@@ -23,8 +23,8 @@
     {{ end }}
   </title>
   {{- $canonicalUrl := string .Permalink -}}
-  {{- if (ne (getenv "CANONICAL_PATH") "") -}}
-  {{- $canonicalUrl = (replace $canonicalUrl (trim .Site.BaseURL "/") (trim (getenv "CANONICAL_PATH") "/")) -}}
+  {{- if (ne (getenv "HUGO_CANONICAL_PATH") "") -}}
+  {{- $canonicalUrl = (replace $canonicalUrl (trim .Site.BaseURL "/") (trim (getenv "HUGO_CANONICAL_PATH") "/")) -}}
   {{- end }}
   <link rel="canonical" href="{{ $canonicalUrl }}" />
 
