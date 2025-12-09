@@ -1,3 +1,6 @@
+# Use bash for all recipes
+set shell := ["bash", "-cu"]
+
 # Private task to setup Darwin/macOS dependencies
 _setup-darwin:
     #!/usr/bin/env bash
