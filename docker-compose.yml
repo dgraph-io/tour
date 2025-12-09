@@ -1,0 +1,17 @@
+services:
+  dgraph:
+    image: dgraph/standalone:v24.1.4
+    container_name: dgraph-tutorial
+    ports:
+      - "8080:8080"
+      - "9080:9080"
+    volumes:
+      - ./docker/dgraph:/dgraph
+
+  ratel:
+    image: dgraph/ratel:latest
+    container_name: ratel-tutorial
+    ports:
+      - "8000:8000"
+    depends_on:
+      - dgraph
