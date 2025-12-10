@@ -9,20 +9,32 @@ This is "A Tour of Dgraph" - a step-by-step tutorial site built with Hugo. The l
 ## Common Commands
 
 ```bash
-# Install dependencies (hugo)
+# Install dependencies, start Dgraph, and load sample data
 just setup
 
-# Run local development server (watches for changes)
-./scripts/local.sh
+# Run local development server with hot reload
+just run
 
-# Build for local testing with version redirects
-just build-local
-# or directly:
-TOUR_BASE_URL=http://localhost:8000 python3 scripts/build.py
+# Reset Dgraph data and reload sample dataset
+just reset
+
+# Run all DQL and GraphQL tests
+just test
+
+# Start/stop Docker containers manually
+just docker-compose-up
+just docker-compose-down
 
 # Build for production (commits to published/ folder)
 python3 scripts/build.py
 ```
+
+## Local Services
+
+When running `just run`, the following services are available:
+- **Hugo Tour**: http://localhost:8000/ - The tutorial site
+- **Dgraph Alpha**: http://localhost:8080/ - GraphQL and DQL endpoints
+- **Ratel UI**: http://localhost:8001/ - Dgraph query interface
 
 ## Architecture
 
@@ -38,12 +50,15 @@ Tutorial content lives in `content/` as Markdown files, organized by section:
 Each section has numbered `.md` files (1.md, 2.md, etc.) representing tutorial steps.
 
 ### Build System
-- `scripts/build.py` - Main build script that:
+- `Justfile` - Task runner with setup, run, test, reset tasks
+- `docker-compose.yml` - Dgraph and Ratel containers for local development
+- `resources/1million.graphql` - GraphQL schema for the sample movie dataset
+- `resources/1million.schema` - DQL schema for the sample movie dataset
+- `scripts/build.py` - Production build script that:
   - Finds all `dgraph-<version>` branches
   - Builds each branch to `published/<branch>/`
   - Builds the latest release to the root `published/` folder
   - Generates `releases.json` for version switching
-- `scripts/local.sh` - Local development server with hot reload
 - Hugo config: `config.toml` + `releases.json` (generated)
 
 ### Theme
