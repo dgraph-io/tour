@@ -35,29 +35,16 @@ docker-compose-down:
 _setup-darwin:
     #!/usr/bin/env bash
     [[ "$(uname)" == "Darwin" ]] || exit 0
-    if ! command -v brew &> /dev/null; then
-        echo "Installing Homebrew..."
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    fi
-    if ! command -v hugo &> /dev/null; then
-        echo "Installing hugo..."
-        brew install hugo
-    fi
-    if ! command -v docker &> /dev/null; then
-        echo "Installing docker..."
-        brew install --cask docker
-    fi
+    (command -v brew &> /dev/null) || { echo "Installing Homebrew..." && /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; }
+    (command -v hugo &> /dev/null) || { echo "Installing hugo..." && brew install hugo; }
+    (command -v docker &> /dev/null) || { echo "Installing docker..." && brew install --cask docker; }
 
 # Install platform dependencies (hugo, docker) on Ubuntu/Debian
 _setup-ubuntu-derived-linux:
     #!/usr/bin/env bash
-    command -v apt &> /dev/null || exit 0
-    if ! command -v hugo &> /dev/null; then
-        sudo apt install -y hugo
-    fi
-    if ! command -v docker &> /dev/null; then
-        sudo apt install -y docker.io
-    fi
+    (command -v apt &> /dev/null) || exit 0
+    (command -v hugo &> /dev/null) || sudo apt install -y hugo
+    (command -v docker &> /dev/null) || sudo apt install -y docker.io
 
 _ensure-docker-dgraph-mount-dir:
     [[ -d docker/dgraph ]] || mkdir -p docker/dgraph
