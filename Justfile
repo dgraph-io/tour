@@ -1,7 +1,37 @@
 # Use bash for all recipes
 set shell := ["bash", "-cu"]
 
-# Private task to setup Darwin/macOS dependencies
+# ============================================================================
+# Public Tasks
+# ============================================================================
+
+# Install dependencies, start Dgraph, and load sample data
+setup: _setup-darwin _setup-ubuntu-derived-linux _ensure-docker-dgraph-mount-dir _cluster-up _data-and-schemas
+
+# Start Hugo development server with hot reload
+run: setup _start-server
+
+# Reset Dgraph data and reload sample dataset
+reset: _cluster-down
+    [[ -d docker/dgraph ]] && rm -rf docker/dgraph
+    just setup
+
+# Run all tests (DQL and GraphQL)
+test: _test-dql _test-graphql
+
+# Start Dgraph and Ratel containers
+docker-compose-up:
+    docker compose up -d
+
+# Stop Dgraph and Ratel containers
+docker-compose-down:
+    docker compose down
+
+# ============================================================================
+# Private Setup Tasks
+# ============================================================================
+
+# Install platform dependencies (hugo, docker) on macOS
 _setup-darwin:
     #!/usr/bin/env bash
     [[ "$(uname)" == "Darwin" ]] || exit 0
@@ -18,7 +48,7 @@ _setup-darwin:
         brew install --cask docker
     fi
 
-# Private task to setup deps on Ubuntu-derived linux distros (Mint, Pop!_OS, etc.)
+# Install platform dependencies (hugo, docker) on Ubuntu/Debian
 _setup-ubuntu-derived-linux:
     #!/usr/bin/env bash
     command -v apt &> /dev/null || exit 0
@@ -29,49 +59,29 @@ _setup-ubuntu-derived-linux:
         sudo apt install -y docker.io
     fi
 
-# Private task to create required directories
 _ensure-docker-dgraph-mount-dir:
     [[ -d docker/dgraph ]] || mkdir -p docker/dgraph
 
-# Run local development server with hot reload
-_start_server: setup
-    hugo server -w --baseURL=http://localhost:8000/ --config config.toml,releases.json
+# ============================================================================
+# Private Docker Tasks
+# ============================================================================
 
-# Public task that runs platform-specific setup
-setup: _setup-darwin _setup-ubuntu-derived-linux _ensure-docker-dgraph-mount-dir _cluster-up _data-and-schemas
-
-
-run: setup _start_server
-    open http://localhost:8000/
-
-# Start Dgraph and Ratel containers
-docker-compose-up:
-    docker compose up -d
-
-# Stop Dgraph and Ratel containers
-docker-compose-down:
-    docker compose down
-
-# Private task to ensure docker compose is running
 _cluster-up:
     #!/usr/bin/env bash
     if ! docker compose ps --status running 2>/dev/null | grep -q dgraph-tutorial; then
         just docker-compose-up
     fi
 
-# Private task to ensure docker compose is stopped
 _cluster-down:
     #!/usr/bin/env bash
     if docker compose ps --status running 2>/dev/null | grep -q dgraph-tutorial; then
         just docker-compose-down
     fi
 
-# Reset Dgraph data and reload sample dataset
-reset: _cluster-down
-    [[ -d docker/dgraph ]] && rm -rf docker/dgraph
-    just setup
+# ============================================================================
+# Private Data Loading Tasks
+# ============================================================================
 
-# Private task to download and load sample dataset into Dgraph
 _data-and-schemas: _cluster-up
     #!/usr/bin/env bash
     # Wait for Dgraph to be healthy
@@ -107,10 +117,17 @@ _data-and-schemas: _cluster-up
       echo "Done"
     fi
 
-# Run all tests
-test: _test-dql _test-graphql
+# ============================================================================
+# Private Hugo Tasks
+# ============================================================================
 
-# Test DQL schema with sample queries for all node types and relationships
+_start-server: setup
+    hugo server -w --baseURL=http://localhost:8000/ --config config.toml,releases.json
+
+# ============================================================================
+# Private Test Tasks
+# ============================================================================
+
 _test-dql:
     #!/usr/bin/env bash
     check_dql() {
@@ -132,7 +149,6 @@ _test-dql:
     check_dql "4. Genre reverse (~genre)" '{"query": "{ genres(func: has(~genre), first: 2) { name@. ~genre(first: 2) { name@. } } }"}'
     check_dql "5. Country reverse (~country)" '{"query": "{ countries(func: has(~country), first: 2) { name@. ~country(first: 2) { name@. } } }"}'
 
-# Test GraphQL schema with sample queries for all node types and relationships
 _test-graphql:
     #!/usr/bin/env bash
     check_gql() {
@@ -155,4 +171,3 @@ _test-graphql:
     check_gql "5. Country -> Film (reverse)" '{"query": "{ queryCountry(first: 2) { name films(first: 2) { name } } }"}'
     check_gql "6. Rating -> Film (reverse)" '{"query": "{ queryRating(first: 2) { name films(first: 2) { name } } }"}'
     check_gql "7. ContentRating -> Film (reverse)" '{"query": "{ queryContentRating(first: 2) { name films(first: 2) { name } } }"}'
-

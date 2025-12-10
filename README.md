@@ -6,10 +6,59 @@ Visit https://dgraph.io/tour for the running instance.
 
 **Use [Discuss Issues](https://discuss.dgraph.io/tags/c/issues/35/tutorial) for reporting issues about this repository.**
 
-## Developing
+## Local Development
 
-The tutorial can be run locally by cloning this repo and running `scripts/local.sh`.
-The tour has been tested with hugo `v0.37`.
+### Prerequisites
+
+Install [just](https://github.com/casey/just), a command runner:
+
+```bash
+# macOS
+brew install just
+
+# Ubuntu/Debian
+sudo apt install just
+
+# Or via cargo (any platform)
+cargo install just
+```
+
+### Quick Start
+
+```bash
+# Clone and setup (installs dependencies, starts Dgraph, loads sample data)
+git clone https://github.com/dgraph-io/tutorial.git
+cd tutorial
+just setup
+
+# Start development server with hot reload
+just run
+```
+
+The tour will be available at http://localhost:8000/
+
+### Available Tasks
+
+Run `just --list` to see all available tasks. Public tasks:
+
+| Task | Description |
+|------|-------------|
+| `just setup` | Install dependencies, start Dgraph, and load sample data |
+| `just run` | Start Hugo development server with hot reload |
+| `just reset` | Reset Dgraph data and reload sample dataset |
+| `just test` | Run all DQL and GraphQL tests |
+| `just docker-compose-up` | Start Dgraph and Ratel containers |
+| `just docker-compose-down` | Stop Dgraph and Ratel containers |
+
+### Services
+
+When running locally, the following services are available:
+
+- **Hugo Tour**: http://localhost:8000/ - The tutorial site
+- **Dgraph Alpha**: http://localhost:8080/ - GraphQL and DQL endpoints
+- **Ratel UI**: http://localhost:8001/ - Dgraph query interface
+
+### Legacy Development
 
 To develop and test version redirects locally run the build script:
 `TOUR_BASE_URL=http://localhost:8000 python3 scripts/build.py`
