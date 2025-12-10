@@ -6,7 +6,7 @@ set shell := ["bash", "-cu"]
 # ============================================================================
 
 # Install dependencies, start Dgraph, and load sample data
-setup: _setup-darwin _setup-ubuntu-derived-linux _ensure-docker-dgraph-mount-dir _cluster-up _data-and-schemas
+setup: _deps-darwin _deps-linux-apt _docker-dgraph-dir _cluster-up _schema-and-data
 
 # Start Hugo development server with hot reload
 run: setup _start-server
@@ -32,7 +32,7 @@ docker-compose-down:
 # ============================================================================
 
 # Install platform dependencies (hugo, docker) on macOS
-_setup-darwin:
+_deps-darwin:
     #!/usr/bin/env bash
     [[ "$(uname)" == "Darwin" ]] || exit 0
     (command -v brew &> /dev/null) || { echo "Installing Homebrew..." && /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; }
@@ -40,13 +40,13 @@ _setup-darwin:
     (command -v docker &> /dev/null) || { echo "Installing docker..." && brew install --cask docker; }
 
 # Install platform dependencies (hugo, docker) on Ubuntu/Debian
-_setup-ubuntu-derived-linux:
+_deps-linux-apt:
     #!/usr/bin/env bash
     (command -v apt &> /dev/null) || exit 0
     (command -v hugo &> /dev/null) || sudo apt install -y hugo
     (command -v docker &> /dev/null) || sudo apt install -y docker.io
 
-_ensure-docker-dgraph-mount-dir:
+_docker-dgraph-dir:
     [[ -d docker/dgraph ]] || mkdir -p docker/dgraph
 
 # ============================================================================
@@ -69,7 +69,7 @@ _cluster-down:
 # Private Data Loading Tasks
 # ============================================================================
 
-_data-and-schemas: _cluster-up
+_schema-and-data: _cluster-up
     #!/usr/bin/env bash
     # Wait for Dgraph to be healthy
     echo "Waiting for Dgraph to be ready..."
