@@ -12,6 +12,6 @@ services:
     image: dgraph/ratel:latest
     container_name: ratel-tutorial
     ports:
-      - "8001:8001"
+      - "8001:8000"
     depends_on:
       - dgraph
