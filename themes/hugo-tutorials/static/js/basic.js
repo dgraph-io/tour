@@ -63,6 +63,47 @@ $(document).on(
   }
 );
 
+// Override run-graphql to use fetch() for local development
+$(document).on(
+  "click",
+  '.runnable [data-action="run-graphql"]',
+  async function (e) {
+    e.preventDefault();
+    e.stopImmediatePropagation(); // Prevent runnable.js handler
+
+    var $currentRunnable = $(this).closest(".runnable");
+    var query = $currentRunnable.attr("data-current");
+    var endpoint = sessionStorage.getItem("graphqlendpoint");
+
+    if (!endpoint) {
+      $(".runnable-url-modal.modal").addClass("show");
+      return null;
+    }
+
+    var responseEl = $currentRunnable.find(".output");
+    $currentRunnable.find(".output-container").removeClass("empty error");
+    responseEl.text("Waiting for the server response...");
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query })
+      });
+
+      const data = await response.json();
+      if (data.errors) {
+        $currentRunnable.find(".output-container").addClass("error");
+      }
+      if (data.extensions) delete data.extensions;
+      responseEl.html("<pre>" + JSON.stringify(data, null, 2) + "</pre>");
+    } catch (err) {
+      $currentRunnable.find(".output-container").addClass("error");
+      responseEl.text("Error: " + err.message);
+    }
+  }
+);
+
 // Override push schema to use fetch() for local development
 $(document).on(
   "click",
