@@ -1,0 +1,13 @@
+{
+  michael(func: anyofterms(name, "Michael")) {
+    name
+    owns_pet {
+      name
+    }
+    friend {
+      name
+      friend { expand(_all_) { expand(_all_) } }
+      owns_pet { name }
+    }
+  }
+}
