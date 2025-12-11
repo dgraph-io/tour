@@ -31,20 +31,26 @@ docker-compose-down:
 # Private Setup Tasks
 # ============================================================================
 
-# Install platform dependencies (hugo, docker) on macOS
+# Install platform dependencies (hugo, docker, node, npm, npx) on macOS
 _deps-darwin:
     #!/usr/bin/env bash
     [[ "$(uname)" == "Darwin" ]] || exit 0
     (command -v brew &> /dev/null) || { echo "Installing Homebrew..." && /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; }
     (command -v hugo &> /dev/null) || { echo "Installing hugo..." && brew install hugo; }
     (command -v docker &> /dev/null) || { echo "Installing docker..." && brew install --cask docker; }
+    (command -v node &> /dev/null) || { echo "Installing node..." && brew install node; }
+    (command -v npm &> /dev/null) || { echo "Installing npm..." && brew install npm; }
+    (command -v npx &> /dev/null) || { echo "Installing npx..." && npm install -g npx; }
 
-# Install platform dependencies (hugo, docker) on Ubuntu/Debian
+# Install platform dependencies (hugo, docker, node, npm, npx) on Ubuntu/Debian
 _deps-linux-apt:
     #!/usr/bin/env bash
     (command -v apt &> /dev/null) || exit 0
     (command -v hugo &> /dev/null) || sudo apt install -y hugo
     (command -v docker &> /dev/null) || sudo apt install -y docker.io
+    (command -v node &> /dev/null) || sudo apt install -y nodejs
+    (command -v npm &> /dev/null) || sudo apt install -y npm
+    (command -v npx &> /dev/null) || { echo "Installing npx..." && sudo npm install -g npx; }
 
 _docker-dgraph-dir:
     [[ -d docker/dgraph ]] || mkdir -p docker/dgraph
