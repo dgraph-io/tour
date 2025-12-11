@@ -77,3 +77,4 @@ Custom Hugo theme in `themes/hugo-tutorials/` with layouts and static assets.
 
 ## Important Behavioral Guidelines
 IMPORTANT: When applicable, prefer using jetbrains-index MCP tools for code navigation and refactoring.
+- memory Do not make changes to the hugo build output directories (public, published) when making changes.  Focus on the templates.  Do not consider those output directories unless you are verifying that hugo is producing expected output.
