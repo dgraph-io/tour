@@ -21,7 +21,7 @@ cd tutorial
 make setup
 
 # Start development server with hot reload
-make run
+make start
 ```
 
 The tour will be available at http://localhost:8000/
@@ -31,7 +31,9 @@ The tour will be available at http://localhost:8000/
 | Task | Description |
 |------|-------------|
 | `make setup` | Install dependencies, start Dgraph, and load sample data |
-| `make run` | Start Hugo development server with hot reload |
+| `make start` | Start Hugo development server with hot reload |
+| `make stop` | Stop Hugo server and Dgraph containers |
+| `make restart` | Restart Hugo server and Dgraph containers |
 | `make reset` | Reset Dgraph data and reload sample dataset |
 | `make test` | Run all DQL and GraphQL tests |
 | `make docker-compose-up` | Start Dgraph and Ratel containers |

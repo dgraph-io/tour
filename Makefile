@@ -6,7 +6,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 # Mark all targets as phony (not files)
-.PHONY: help setup run reset test docker-compose-up docker-compose-down \
+.PHONY: help setup start stop restart reset test docker-compose-up docker-compose-down \
         _deps-darwin _deps-linux-apt _docker-dgraph-dir _cluster-up _cluster-down \
         _schema-and-data _start-server _test-dql _test-graphql
 
@@ -19,10 +19,10 @@ help:
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Targets:"
-	@grep -E '^## ' $(MAKEFILE_LIST) | sed 's/## //'
-	@echo ""
 	@echo "  setup              Install dependencies, start Dgraph, and load sample data"
-	@echo "  run                Start Hugo development server with hot reload"
+	@echo "  start              Start Hugo development server with hot reload"
+	@echo "  stop               Stop Hugo server and Dgraph containers"
+	@echo "  restart            Restart Hugo server and Dgraph containers"
 	@echo "  reset              Reset Dgraph data and reload sample dataset"
 	@echo "  test               Run all tests (DQL and GraphQL)"
 	@echo "  docker-compose-up  Start Dgraph and Ratel containers"
@@ -32,7 +32,17 @@ help:
 setup: _deps-darwin _deps-linux-apt _docker-dgraph-dir _cluster-up _schema-and-data
 
 ## Start Hugo development server with hot reload
-run: setup _start-server
+start: setup _start-server
+
+## Stop Hugo server and Dgraph containers
+stop: _cluster-down
+	@if pgrep -f "hugo server" > /dev/null; then \
+		echo "Stopping Hugo server..."; \
+		pkill -f "hugo server" || true; \
+	fi
+
+## Restart Hugo server and Dgraph containers
+restart: stop start
 
 ## Reset Dgraph data and reload sample dataset
 reset: _cluster-down
