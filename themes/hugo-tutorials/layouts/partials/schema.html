@@ -7,8 +7,8 @@
         <span>GraphQL Schema</span>
       </div>
       <span class="server-switch">
-        <span>Dgraph Cloud:</span>
-        <span class="url sessionDisplayVal" data-key="graphqlendpoint">http://localhost:8080</span>
+        <span>Dgraph:</span>
+        <span class="url sessionDisplayVal" data-key="graphqlendpoint">{{ .Content.Site.Params.url.graphqlEndpoint }}</span>
         <a class="btn-change" href="#">
             <i class="far fa-edit"></i>
         </a>
@@ -59,15 +59,10 @@
       <div class="modal-body">
         <div class="container-fluid">
           <form>
-            <p>For directions on obtaining your GraphQL Endpoint and API Key see <a href="/tour/graphqlintro/2">Run Dgraph</a></p>
+            <p>Enter the GraphQL endpoint for your local Dgraph instance.</p>
             <div class="form-group">
               <label for="inputGraphQLEndpoint">GraphQL Endpoint</label>
-              <input type="text" class="form-control sessionInput" data-key="graphqlendpoint" id="inputGraphQLEndpoint" placeholder="https://your-endpoint.location.provider.cloud.dgraph.io/graphql" style="padding:0 4px;">
-              <!-- <small id="serverStatus" class="form-text text-muted">Server status goes hear.</small> -->
-            </div>
-            <div class="form-group">
-              <label for="inputAPIKey">API Key</label>
-              <input type="text" class="form-control sessionInput" data-key="apikey" id="inputAPIKey" placeholder="Your Admin API Key" style="padding:0 4px;">
+              <input type="text" class="form-control sessionInput" data-key="graphqlendpoint" id="inputGraphQLEndpoint" placeholder="{{ .Content.Site.Params.url.graphqlEndpoint }}" style="padding:0 4px;">
             </div>
           </form>
         </div>

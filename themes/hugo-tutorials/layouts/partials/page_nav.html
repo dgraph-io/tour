@@ -11,23 +11,23 @@
 
 <div class="dgraph-header">
   <div class="header-container">
-    <a href="https://dgraph.io" aria-current="page" class="dgraph_logo">
+    <a href="{{ .Site.Params.url.dgraphHome }}" aria-current="page" class="dgraph_logo">
       <div class="nav_logo-embed w-embed">
         <img src='{{ relURL "/images/DgraphByHypermode_light.svg" }}' alt="Dgraph by Hypermode logo" height="38" width="123" />
       </div>
     </a>
 
     <nav role="navigation" class="dgraph-menu">
-      <a href="https://dgraph.io/product" class="navigation-link">
+      <a href="{{ .Site.Params.url.dgraphProduct }}" class="navigation-link">
         <div>Product</div>
       </a>
-      <a href="https://dgraph.io/solutions" class="navigation-link">
+      <a href="{{ .Site.Params.url.dgraphSolutions }}" class="navigation-link">
         <div>Solutions</div>
       </a>
-      <a href="https://dgraph.io/docs" class="navigation-link">
+      <a href="{{ .Site.Params.url.dgraphDocs }}" class="navigation-link">
         <div>Docs</div>
       </a>
-      <a href="https://dgraph.io/pricing" class="navigation-link">
+      <a href="{{ .Site.Params.url.dgraphPricing }}" class="navigation-link">
         <div>Pricing</div>
       </a>
       <div class="navigation-link has-submenu">
@@ -47,7 +47,7 @@
               <div class="nav-submenu-title">Learn</div>
               <div class="nav-submenu-list">
                 <div class="nav-submenu-list-item">
-                  <a href="https://dgraph.io/docs">
+                  <a href="{{ .Site.Params.url.dgraphDocs }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="nav-submenu-list-item-arrow" width="15" height="14" viewBox="0 0 15 14" fill="none">
                       <path d="M1 7H13.5M13.5 7L7.5 1M13.5 7L7.5 13" stroke="#EF265A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
@@ -56,7 +56,7 @@
                   </a>
                 </div>
                 <div class="nav-submenu-list-item">
-                  <a href="https://dgraph.io/tour">
+                  <a href="{{ .Site.Params.url.dgraphTour }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="nav-submenu-list-item-arrow" width="15" height="14" viewBox="0 0 15 14" fill="none">
                       <path d="M1 7H13.5M13.5 7L7.5 1M13.5 7L7.5 13" stroke="#EF265A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
@@ -70,7 +70,7 @@
               <div class="nav-submenu-title">Resources</div>
               <div class="nav-submenu-list">
                 <div class="nav-submenu-list-item">
-                  <a href="https://dgraph.io/blog/">
+                  <a href="{{ .Site.Params.url.dgraphBlog }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="nav-submenu-list-item-arrow" width="15" height="14" viewBox="0 0 15 14" fill="none">
                       <path d="M1 7H13.5M13.5 7L7.5 1M13.5 7L7.5 13" stroke="#EF265A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
@@ -79,7 +79,7 @@
                   </a>
                 </div>
                 <div class="nav-submenu-list-item">
-                  <a href="https://dgraph.io/paper">
+                  <a href="{{ .Site.Params.url.dgraphPaper }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="nav-submenu-list-item-arrow" width="15" height="14" viewBox="0 0 15 14" fill="none">
                       <path d="M1 7H13.5M13.5 7L7.5 1M13.5 7L7.5 13" stroke="#EF265A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
@@ -88,7 +88,7 @@
                   </a>
                 </div>
                 <div class="nav-submenu-list-item">
-                  <a href="https://dgraph.io/casestudies">
+                  <a href="{{ .Site.Params.url.dgraphCaseStudies }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="nav-submenu-list-item-arrow" width="15" height="14" viewBox="0 0 15 14" fill="none">
                       <path d="M1 7H13.5M13.5 7L7.5 1M13.5 7L7.5 13" stroke="#EF265A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
@@ -102,7 +102,7 @@
               <div class="nav-submenu-title">Collaborate</div>
               <div class="nav-submenu-list">
                 <div class="nav-submenu-list-item">
-                  <a href="https://discuss.dgraph.io/">
+                  <a href="{{ .Site.Params.url.dgraphForum }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="nav-submenu-list-item-arrow" width="15" height="14" viewBox="0 0 15 14" fill="none">
                       <path d="M1 7H13.5M13.5 7L7.5 1M13.5 7L7.5 13" stroke="#EF265A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
@@ -111,7 +111,7 @@
                   </a>
                 </div>
                 <div class="nav-submenu-list-item">
-                  <a href="https://dgraph.io/community">
+                  <a href="{{ .Site.Params.url.dgraphCommunity }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="nav-submenu-list-item-arrow" width="15" height="14" viewBox="0 0 15 14" fill="none">
                       <path d="M1 7H13.5M13.5 7L7.5 1M13.5 7L7.5 13" stroke="#EF265A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
@@ -126,9 +126,9 @@
       </div>
       <div class="nav_buttons-inside">
         <div class="nav_button_wrapper">
-          <a href="https://cloud.dgraph.io/?__hstc=17958374.33a8f2bf90fb365fa4bbcd78710030ca.1680885624716.1680885624716.1680888099029.2&amp;__hssc=17958374.1.1680888099029&amp;__hsfp=179051687" target="_blank" class="button-ghost nav w-button"
+          <a href="{{ .Site.Params.url.dgraphCloud }}" target="_blank" class="button-ghost nav w-button"
             >Sign In</a
-          ><a href="https://cloud.dgraph.io/?__hstc=17958374.33a8f2bf90fb365fa4bbcd78710030ca.1680885624716.1680885624716.1680888099029.2&amp;__hssc=17958374.1.1680888099029&amp;__hsfp=179051687" target="_blank" class="button nav w-inline-block">
+          ><a href="{{ .Site.Params.url.dgraphCloud }}" target="_blank" class="button nav w-inline-block">
             <div>Contact Us</div>
             <div class="button-icon-embed w-embed">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -148,9 +148,9 @@
     <div class="nav_tablet-left">
       <div class="nav_tablet-buttons">
         <div class="nav_button_wrapper">
-          <a href="https://cloud.dgraph.io/?__hstc=17958374.33a8f2bf90fb365fa4bbcd78710030ca.1680885624716.1680885624716.1680888099029.2&amp;__hssc=17958374.1.1680888099029&amp;__hsfp=179051687" target="_blank" class="button-ghost nav w-button"
+          <a href="{{ .Site.Params.url.dgraphCloud }}" target="_blank" class="button-ghost nav w-button"
             >Sign In</a
-          ><a href="https://cloud.dgraph.io/?__hstc=17958374.33a8f2bf90fb365fa4bbcd78710030ca.1680885624716.1680885624716.1680888099029.2&amp;__hssc=17958374.1.1680888099029&amp;__hsfp=179051687" target="_blank" class="button nav w-inline-block">
+          ><a href="{{ .Site.Params.url.dgraphCloud }}" target="_blank" class="button nav w-inline-block">
             <div>Contact Us</div>
             <div class="button-icon-embed w-embed">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

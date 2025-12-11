@@ -98,7 +98,7 @@
                   Dgraph gives you the scalability and performance you need with the pricing and transparency you expect. Start building today with the world’s most advanced and performant graph database with native GraphQL.
                 </p>
                 <div class="footer_top-cta_button">
-                  <a href="https://cloud.dgraph.io/pricing?type=free&amp;zo=us-east-1" target="_blank" class="button-red is-icon w-inline-block">
+                  <a href="{{ .Site.Params.url.dgraphCloudPricing }}" target="_blank" class="button-red is-icon w-inline-block">
                     <div>Start Free Trial</div>
                     <div class="button-icon-embed-whaite w-embed">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -124,7 +124,7 @@
                       <div class="text-size-small">View tracker and issues</div>
                     </div>
                   </div>
-                  <a href="https://github.com/dgraph-io/dgraph" class="button-red small w-button">GitHub</a>
+                  <a href="{{ .Site.Params.url.dgraphGitHub }}" class="button-red small w-button">GitHub</a>
                 </div>
                 <div class="footer_top-cta-card is-red">
                   <div class="footer_top-cta-card-left">
@@ -136,7 +136,7 @@
                       <div class="text-size-small">Participate in the conversation</div>
                     </div>
                   </div>
-                  <a href="https://discuss.dgraph.io/" class="button is-small red-bg w-button">Discuss</a>
+                  <a href="{{ .Site.Params.url.dgraphForum }}" class="button is-small red-bg w-button">Discuss</a>
                 </div>
               </div>
             </div>
@@ -156,10 +156,10 @@
                       <div class="footer-link-heading">Resources</div>
                       <div class="footer-link-row_column">
                         <div class="footer_links-row">
-                          <a href="https://dgraph.io/docs" class="footer_link">Docs</a><a href="https://dgraph.io/tour" class="footer_link">Tour</a><a href="https://discuss.dgraph.io/" target="_blank" class="footer_link">Forum</a
+                          <a href="{{ .Site.Params.url.dgraphDocs }}" class="footer_link">Docs</a><a href="{{ .Site.Params.url.dgraphTour }}" class="footer_link">Tour</a><a href="{{ .Site.Params.url.dgraphForum }}" target="_blank" class="footer_link">Forum</a
                           ><a href="/community" target="_blank" class="footer_link">Community</a>
                         </div>
-                        <div class="footer_links-row"><a href="https://dgraph.io/blog/" class="footer_link">Blog</a><a href="https://dgraph.io/paper" class="footer_link">Whitepapers</a><a href="https://dgraph.io/casestudies" target="_blank" class="footer_link">Case Studies</a></div>
+                        <div class="footer_links-row"><a href="{{ .Site.Params.url.dgraphBlog }}" class="footer_link">Blog</a><a href="{{ .Site.Params.url.dgraphPaper }}" class="footer_link">Whitepapers</a><a href="{{ .Site.Params.url.dgraphCaseStudies }}" target="_blank" class="footer_link">Case Studies</a></div>
                       </div>
                     </div>
                   </div>
@@ -174,13 +174,13 @@
               </div>
               <div class="footer_copyright">
                 <div class="footer_legal-notice">
-                  <a href="https://dgraph.io/legal-notices/cloud-terms" class="legal-notices-wrap w-inline-block"
+                  <a href="{{ .Site.Params.url.dgraphLegal }}" class="legal-notices-wrap w-inline-block"
                     ><div class="legal-notices">Legal Notices</div>
                     <img src="https://global-uploads.webflow.com/63fa3e9d303f20f698270a7a/643fe0a14c67fd3b3ad29b65_top-right-arrow-icon.svg" loading="lazy" alt=""
                   /></a>
                 </div>
                 <div class="footer_social new">
-                  <a href="https://twitter.com/dgraphlabs" target="_blank" class="footer_social_link w-inline-block"
+                  <a href="{{ .Site.Params.url.dgraphTwitter }}" target="_blank" class="footer_social_link w-inline-block"
                     ><div class="icon-embed w-embed">
                       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -188,7 +188,7 @@
                           fill="currentColor"
                         ></path>
                       </svg></div></a
-                  ><a href="https://www.linkedin.com/company/dgraph-labs" target="_blank" class="footer_social_link w-inline-block"
+                  ><a href="{{ .Site.Params.url.dgraphLinkedIn }}" target="_blank" class="footer_social_link w-inline-block"
                     ><div class="icon-embed w-embed">
                       <svg width=" 100%" height=" 100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -196,7 +196,7 @@
                           fill="currentColor"
                         ></path>
                       </svg></div></a
-                  ><a href="https://github.com/dgraph-io/dgraph" target="_blank" class="footer_social_link w-inline-block"
+                  ><a href="{{ .Site.Params.url.dgraphGitHub }}" target="_blank" class="footer_social_link w-inline-block"
                     ><div class="icon-embed w-embed">
                       <svg width=" 100%" height=" 100%" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -206,7 +206,7 @@
                           fill="currentColor"
                         ></path>
                       </svg></div></a
-                  ><a href="https://www.youtube.com/channel/UCghE41LR8nkKFlR3IFTRO4w" target="_blank" class="footer_social_link w-inline-block"
+                  ><a href="{{ .Site.Params.url.dgraphYouTube }}" target="_blank" class="footer_social_link w-inline-block"
                     ><div class="icon-embed w-embed">
                       <svg width=" 100%" height=" 100%" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
