@@ -85,6 +85,36 @@ canonifyURLs = false
 
 
 [params]
+  [params.url]
+    # Dgraph site
+    dgraphHome = "https://dgraph.io"
+    dgraphDocs = "https://dgraph.io/docs"
+    dgraphTour = "https://dgraph.io/tour"
+    dgraphBlog = "https://dgraph.io/blog/"
+    dgraphPricing = "https://dgraph.io/pricing"
+    dgraphProduct = "https://dgraph.io/product"
+    dgraphSolutions = "https://dgraph.io/solutions"
+    dgraphPaper = "https://dgraph.io/paper"
+    dgraphCaseStudies = "https://dgraph.io/casestudies"
+    dgraphCommunity = "https://dgraph.io/community"
+    dgraphLegal = "https://dgraph.io/legal-notices/cloud-terms"
+
+    # Dgraph services
+    dgraphCloud = "https://cloud.dgraph.io"
+    dgraphCloudPricing = "https://cloud.dgraph.io/pricing?type=free&zo=us-east-1"
+    dgraphPlay = "https://play.dgraph.io"
+    dgraphPlayGraphQL = "https://play.dgraph.io/graphql"
+    dgraphForum = "https://discuss.dgraph.io/"
+    dgraphGitHub = "https://github.com/dgraph-io/dgraph"
+
+    # Social media
+    dgraphTwitter = "https://twitter.com/dgraphlabs"
+    dgraphLinkedIn = "https://www.linkedin.com/company/dgraph-labs"
+    dgraphYouTube = "https://www.youtube.com/channel/UCghE41LR8nkKFlR3IFTRO4w"
+    # Local development
+    localEndpoint = "http://localhost:8080"
+    graphqlEndpoint = "http://localhost:8080/graphql"
+
   [params.menudesc]
     graphqlintro = "In this module you'll learn how to set up and run Dgraph Cloud for the GraphQL portion of this tour, and learn about graph databases."
     graphqlbasic = "Here you'll learn the basics of how to query graph data from Dgraph using GraphQL, and how to use and interpret the results."
