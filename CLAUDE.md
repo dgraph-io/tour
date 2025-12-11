@@ -10,20 +10,20 @@ This is "A Tour of Dgraph" - a step-by-step tutorial site built with Hugo. The l
 
 ```bash
 # Install dependencies, start Dgraph, and load sample data
-just setup
+make setup
 
 # Run local development server with hot reload
-just run
+make run
 
 # Reset Dgraph data and reload sample dataset
-just reset
+make reset
 
 # Run all DQL and GraphQL tests
-just test
+make test
 
 # Start/stop Docker containers manually
-just docker-compose-up
-just docker-compose-down
+make docker-compose-up
+make docker-compose-down
 
 # Build for production (commits to published/ folder)
 python3 scripts/build.py
@@ -31,7 +31,7 @@ python3 scripts/build.py
 
 ## Local Services
 
-When running `just run`, the following services are available:
+When running `make run`, the following services are available:
 - **Hugo Tour**: http://localhost:8000/ - The tutorial site
 - **Dgraph Alpha**: http://localhost:8080/ - GraphQL and DQL endpoints
 - **Ratel UI**: http://localhost:8001/ - Dgraph query interface
@@ -50,7 +50,7 @@ Tutorial content lives in `content/` as Markdown files, organized by section:
 Each section has numbered `.md` files (1.md, 2.md, etc.) representing tutorial steps.
 
 ### Build System
-- `Justfile` - Task runner with setup, run, test, reset tasks
+- `Makefile` - Task runner with setup, run, test, reset tasks
 - `docker-compose.yml` - Dgraph and Ratel containers for local development
 - `resources/1million.graphql` - GraphQL schema for the sample movie dataset
 - `resources/1million.schema` - DQL schema for the sample movie dataset

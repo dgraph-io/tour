@@ -10,18 +10,7 @@ Visit https://dgraph.io/tour for the running instance.
 
 ### Prerequisites
 
-Install [just](https://github.com/casey/just), a command runner:
-
-```bash
-# macOS
-brew install just
-
-# Ubuntu/Debian
-sudo apt install just
-
-# Or via cargo (any platform)
-cargo install just
-```
+`make` is pre-installed on macOS and most Linux distributions.
 
 ### Quick Start
 
@@ -29,26 +18,26 @@ cargo install just
 # Clone and setup (installs dependencies, starts Dgraph, loads sample data)
 git clone https://github.com/dgraph-io/tutorial.git
 cd tutorial
-just setup
+make setup
 
 # Start development server with hot reload
-just run
+make run
 ```
 
 The tour will be available at http://localhost:8000/
 
 ### Available Tasks
 
-Run `just --list` to see all available tasks. Public tasks:
-
 | Task | Description |
 |------|-------------|
-| `just setup` | Install dependencies, start Dgraph, and load sample data |
-| `just run` | Start Hugo development server with hot reload |
-| `just reset` | Reset Dgraph data and reload sample dataset |
-| `just test` | Run all DQL and GraphQL tests |
-| `just docker-compose-up` | Start Dgraph and Ratel containers |
-| `just docker-compose-down` | Stop Dgraph and Ratel containers |
+| `make setup` | Install dependencies, start Dgraph, and load sample data |
+| `make run` | Start Hugo development server with hot reload |
+| `make reset` | Reset Dgraph data and reload sample dataset |
+| `make test` | Run all DQL and GraphQL tests |
+| `make docker-compose-up` | Start Dgraph and Ratel containers |
+| `make docker-compose-down` | Stop Dgraph and Ratel containers |
+
+Run `make help` to see all available tasks.
 
 ### Services
 
