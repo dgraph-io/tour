@@ -88,10 +88,9 @@ canonifyURLs = false
   [params.url]
     # Dgraph site
     dgraphHome = "https://dgraph.io"
-    dgraphDocs = "https://dgraph.io/docs"
-    dgraphTour = "https://dgraph.io/tour"
+    dgraphDocs = "https://docs.dgraph.io/"
+    dgraphTour = "/"
     dgraphBlog = "https://dgraph.io/blog/"
-    dgraphPricing = "https://dgraph.io/pricing"
     dgraphProduct = "https://dgraph.io/product"
     dgraphSolutions = "https://dgraph.io/solutions"
     dgraphPaper = "https://dgraph.io/paper"
@@ -100,8 +99,6 @@ canonifyURLs = false
     dgraphLegal = "https://dgraph.io/legal-notices/cloud-terms"
 
     # Dgraph services
-    dgraphCloud = "https://cloud.dgraph.io"
-    dgraphCloudPricing = "https://cloud.dgraph.io/pricing?type=free&zo=us-east-1"
     dgraphPlay = "http://localhost:8001"
     dgraphPlayGraphQL = "http://localhost:8001/graphql"
     dgraphForum = "https://discuss.dgraph.io/"
@@ -116,7 +113,7 @@ canonifyURLs = false
     graphqlEndpoint = "http://localhost:8080/graphql"
 
   [params.menudesc]
-    graphqlintro = "In this module you'll learn how to set up and run Dgraph Cloud for the GraphQL portion of this tour, and learn about graph databases."
+    graphqlintro = "In this module you'll learn how to set up and run Dgraph for the GraphQL portion of this tour, and learn about graph databases."
     graphqlbasic = "Here you'll learn the basics of how to query graph data from Dgraph using GraphQL, and how to use and interpret the results."
     graphqlschema = "This module shows you how GraphQL schemas work inside Dgraph; and how to add, update, and delete data."
     graphqlmoredata = "Now that you have some experience with Dgraph and GraphQL, this module shows you how to work with some larger datasets."
