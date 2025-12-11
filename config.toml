@@ -102,8 +102,8 @@ canonifyURLs = false
     # Dgraph services
     dgraphCloud = "https://cloud.dgraph.io"
     dgraphCloudPricing = "https://cloud.dgraph.io/pricing?type=free&zo=us-east-1"
-    dgraphPlay = "https://play.dgraph.io"
-    dgraphPlayGraphQL = "https://play.dgraph.io/graphql"
+    dgraphPlay = "http://localhost:8001"
+    dgraphPlayGraphQL = "http://localhost:8001/graphql"
     dgraphForum = "https://discuss.dgraph.io/"
     dgraphGitHub = "https://github.com/dgraph-io/dgraph"
 
