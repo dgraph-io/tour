@@ -13,6 +13,11 @@ function updateFields() {
 }
 
 $(document).ready(function () {
+  // Initialize graphqlEndpoint with default if not set
+  if (!sessionStorage.getItem("graphqlEndpoint")) {
+    const defaultEndpoint = window.dgraphConfig?.graphqlEndpoint || "http://localhost:8080/graphql";
+    sessionStorage.setItem("graphqlEndpoint", defaultEndpoint);
+  }
   updateFields();
   $(".lesson-tiles__link .status").each(function () {
     const status = localStorage.getItem(`${$(this).data("course")}.Status`);
@@ -48,8 +53,7 @@ $(document).on(
   "click",
   ".runnable-url-modal button[data-action=apply-endpoint]",
   function (e) {
-    sessionStorage.setItem("graphqlendpoint", $("#inputGraphQLEndpoint").val());
-    sessionStorage.setItem("apikey", $("#inputAPIKey").val());
+    sessionStorage.setItem("graphqlEndpoint", $("#inputGraphQLEndpoint").val());
     $(".runnable-url-modal.modal").removeClass("show");
     updateFields();
   }
@@ -103,7 +107,7 @@ $(document).ready(function () {
   };
   request.send();
   $("iframe.ratel.query").each(function () {
-    let url = "https://play.dgraph.io/?latest";
+    let url = (window.dgraphConfig?.dgraphPlay || "https://play.dgraph.io") + "/?latest";
     const address = localStorage.getItem("tourDgraphAddr");
     const slashApiKey = localStorage.getItem("slashAPIKey");
     const query = $(this).data("code");
@@ -118,7 +122,7 @@ $(document).ready(function () {
     $(this).attr("src", url);
   });
   $("iframe.ratel.mutate").each(function () {
-    let url = "https://play.dgraph.io/?latest";
+    let url = (window.dgraphConfig?.dgraphPlay || "https://play.dgraph.io") + "/?latest";
     const address = localStorage.getItem("tourDgraphAddr");
     const slashApiKey = localStorage.getItem("slashAPIKey");
     if (address || slashApiKey) {
