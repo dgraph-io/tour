@@ -39,7 +39,7 @@ stop: ## Stop Hugo server and Dgraph containers
 		echo "Stopping Hugo server..."; \
 		pkill -f "hugo server" || true; \
 	fi
-	@if docker compose ps --status running 2>/dev/null | grep -q dgraph-tutorial; then \
+	@if docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
 		docker compose down; \
 	fi
 
@@ -48,7 +48,7 @@ restart: stop start ## Restart Hugo server and Dgraph containers
 
 .PHONY: reset
 reset: ## Reset Dgraph data and reload sample dataset
-	@if docker compose ps --status running 2>/dev/null | grep -q dgraph-tutorial; then \
+	@if docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
 		docker compose down; \
 	fi
 	@[[ -d docker/dgraph ]] && rm -rf docker/dgraph || true
@@ -93,7 +93,7 @@ test-tour: ## Test tour example queries
 
 .PHONY: docker-up
 docker-up: ## Start Dgraph and Ratel containers
-	@if ! docker compose ps --status running 2>/dev/null | grep -q dgraph-tutorial; then \
+	@if ! docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
 		docker compose up -d; \
 	fi
 
@@ -143,7 +143,7 @@ load-data: docker-up
 		echo "Loading DQL schema and data..."; \
 		[[ -s docker/dgraph/1million.rdf.gz ]] || cp resources/1million.rdf.gz docker/dgraph/; \
 		[[ -s docker/dgraph/1million.schema ]] || cp resources/1million.schema docker/dgraph/; \
-		docker exec dgraph-tutorial dgraph live -f 1million.rdf.gz -s 1million.schema; \
+		docker exec tour-dgraph dgraph live -f 1million.rdf.gz -s 1million.schema; \
 		[[ -s docker/dgraph/1million.rdf.gz ]] && rm docker/dgraph/1million.rdf.gz || true; \
 		[[ -s docker/dgraph/1million.schema ]] && rm docker/dgraph/1million.schema || true; \
 		echo "Done"; \

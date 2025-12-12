@@ -1,7 +1,7 @@
 services:
   dgraph:
-    image: dgraph/standalone:v24.1.4
-    container_name: dgraph-tutorial
+1    image: dgraph/standalone:v24.1.4
+    container_name: tour-dgraph
     ports:
       - "8080:8080"
       - "9080:9080"
@@ -10,7 +10,7 @@ services:
 
   ratel:
     image: dgraph/ratel:latest
-    container_name: ratel-tutorial
+    container_name: tour-ratel
     ports:
       - "8001:8000"
     depends_on:
