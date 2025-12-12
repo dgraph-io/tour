@@ -8,6 +8,9 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 .DEFAULT_GOAL := help
 
+.PHONY: help setup start stop restart reset test test-1million-dataset test-tour \
+        docker-up docker-down deps docker-dir load-1million-dataset server
+
 # Configuration
 DGRAPH_ALPHA := http://localhost:8080
 HUGO_PORT := 8000
@@ -16,7 +19,6 @@ HUGO_PORT := 8000
 # Help
 # =============================================================================
 
-.PHONY: help
 help: ## Show this help message
 	@echo "Usage: make [target]"
 	@echo ""
@@ -27,13 +29,10 @@ help: ## Show this help message
 # Development
 # =============================================================================
 
-.PHONY: setup
-setup: deps docker-dir docker-up load-data ## Install dependencies, start Dgraph, and load sample data
+setup: deps docker-dir docker-up load-1million-dataset ## Install dependencies, start Dgraph, and load sample data
 
-.PHONY: start
 start: setup server ## Start Hugo development server with hot reload
 
-.PHONY: stop
 stop: ## Stop Hugo server and Dgraph containers
 	@if pgrep -f "hugo server" > /dev/null; then \
 		echo "Stopping Hugo server..."; \
@@ -43,30 +42,25 @@ stop: ## Stop Hugo server and Dgraph containers
 		docker compose down; \
 	fi
 
-.PHONY: restart
 restart: stop start ## Restart Hugo server and Dgraph containers
 
-.PHONY: reset
 reset: ## Reset Dgraph data and reload sample dataset
 	@if docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
 		docker compose down; \
 	fi
-	@[[ -d docker/dgraph ]] && rm -rf docker/dgraph || true
+	@[[ -d docker/dgraph ]] && (rm -rf docker/dgraph 2>/dev/null || docker run --rm -v "$(PWD)/docker:/data" alpine rm -rf /data/dgraph) || true
 	@$(MAKE) setup
 
 # =============================================================================
 # Testing
 # =============================================================================
 
-.PHONY: test
 test: reset test-1million-dataset test-tour ## Run all tests
 
-.PHONY: test-1million-dataset
 test-1million-dataset: ## Test 1million dataset relationships
 	@./tests/test_1million_dataset.sh
 
-.PHONY: test-tour
-test-tour: ## Test tour example queries
+test-tour:
 	@./tests/test_tour_dql.sh
 	@./tests/test_tour_graphql.sh
 
@@ -74,13 +68,11 @@ test-tour: ## Test tour example queries
 # Docker
 # =============================================================================
 
-.PHONY: docker-up
 docker-up: ## Start Dgraph and Ratel containers
 	@if ! docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
 		docker compose up -d; \
 	fi
 
-.PHONY: docker-down
 docker-down: ## Stop Dgraph and Ratel containers
 	docker compose down
 
@@ -88,7 +80,6 @@ docker-down: ## Stop Dgraph and Ratel containers
 # Internal targets (not shown in help)
 # =============================================================================
 
-.PHONY: deps
 deps:
 	@if [[ "$$(uname)" == "Darwin" ]]; then \
 		(command -v brew &> /dev/null) || { echo "Installing Homebrew..." && /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; }; \
@@ -107,12 +98,10 @@ deps:
 		(command -v npx &> /dev/null) || { echo "Installing npx..." && sudo npm install -g npx; }; \
 	fi
 
-.PHONY: docker-dir
 docker-dir:
 	@[[ -d docker/dgraph ]] || mkdir -p docker/dgraph
 
-.PHONY: load-data
-load-data: docker-up
+load-1million-dataset: docker-up
 	@echo "Waiting for Dgraph to be ready..."
 	@until curl -s $(DGRAPH_ALPHA)/health | grep -q '"status":"healthy"'; do \
 		sleep 1; \
@@ -132,6 +121,5 @@ load-data: docker-up
 		echo "Done"; \
 	fi
 
-.PHONY: server
 server:
 	hugo server -w --baseURL=http://localhost:$(HUGO_PORT)/ --config config.toml,releases.json
