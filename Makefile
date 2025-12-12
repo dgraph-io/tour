@@ -59,7 +59,7 @@ reset: ## Reset Dgraph data and reload sample dataset
 # =============================================================================
 
 .PHONY: test
-test: test-data test-tour ## Run all tests
+test: reset test-data test-tour ## Run all tests
 
 .PHONY: test-data
 test-data: ## Test 1million dataset relationships
