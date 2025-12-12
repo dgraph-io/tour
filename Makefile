@@ -8,7 +8,7 @@ SHELL := /bin/bash
 # Mark all targets as phony (not files)
 .PHONY: help setup start stop restart reset test docker-compose-up docker-compose-down \
         _deps-darwin _deps-linux-apt _docker-dgraph-dir _cluster-up _cluster-down \
-        _schema-and-data _start-server _test-dql _test-graphql
+        _schema-and-data _start-server _test-1million-dql
 
 # ============================================================================
 # Public Tasks
@@ -24,7 +24,7 @@ help:
 	@echo "  stop               Stop Hugo server and Dgraph containers"
 	@echo "  restart            Restart Hugo server and Dgraph containers"
 	@echo "  reset              Reset Dgraph data and reload sample dataset"
-	@echo "  test               Run all tests (DQL and GraphQL)"
+	@echo "  test               Run DQL relationship tests"
 	@echo "  docker-compose-up  Start Dgraph and Ratel containers"
 	@echo "  docker-compose-down Stop Dgraph and Ratel containers"
 
@@ -49,8 +49,8 @@ reset: _cluster-down
 	@[[ -d docker/dgraph ]] && rm -rf docker/dgraph || true
 	@$(MAKE) setup
 
-## Run all tests (DQL and GraphQL)
-test: _test-dql _test-graphql
+## Run DQL tests
+test: _test-1million-dql
 
 ## Start Dgraph and Ratel containers
 docker-compose-up:
@@ -117,19 +117,12 @@ _schema-and-data: _cluster-up
 	done
 	@count=$$(curl -s -H "Content-Type: application/json" "http://localhost:8080/query" -d '{"query": "{ count(func: has(genre), first: 1) { count(uid) } }"}' | grep -o '"count":[0-9]\+' | tail -1 | grep -o '[0-9]\+' || echo "0"); \
 	if [[ "$$count" == "0" || -z "$$count" ]]; then \
-		echo "Pushing GraphQL schema..."; \
-		curl -s -X POST http://localhost:8080/admin/schema --data-binary '@resources/1million.graphql'; \
-		echo ""; \
+		echo "Loading DQL schema and data..."; \
 		[[ -s docker/dgraph/1million.rdf.gz ]] || cp resources/1million.rdf.gz docker/dgraph/; \
 		[[ -s docker/dgraph/1million.schema ]] || cp resources/1million.schema docker/dgraph/; \
 		docker exec dgraph-tutorial dgraph live -f 1million.rdf.gz -s 1million.schema; \
 		[[ -s docker/dgraph/1million.rdf.gz ]] && rm docker/dgraph/1million.rdf.gz || true; \
 		[[ -s docker/dgraph/1million.schema ]] && rm docker/dgraph/1million.schema || true; \
-		echo "Adding type labels for GraphQL..."; \
-		curl -s -X POST "http://localhost:8080/mutate?commitNow=true" -H "Content-Type: application/json" -d '{"query": "{ v as var(func: has(genre)) }", "set": { "uid": "uid(v)", "dgraph.type": "Film" }}' > /dev/null; \
-		curl -s -X POST "http://localhost:8080/mutate?commitNow=true" -H "Content-Type: application/json" -d '{"query": "{ v as var(func: has(director.film)) }", "set": { "uid": "uid(v)", "dgraph.type": "Director" }}' > /dev/null; \
-		curl -s -X POST "http://localhost:8080/mutate?commitNow=true" -H "Content-Type: application/json" -d '{"query": "{ v as var(func: has(actor.film)) }", "set": { "uid": "uid(v)", "dgraph.type": "Actor" }}' > /dev/null; \
-		curl -s -X POST "http://localhost:8080/mutate?commitNow=true" -H "Content-Type: application/json" -d '{"query": "{ v as var(func: has(~genre)) }", "set": { "uid": "uid(v)", "dgraph.type": "Genre" }}' > /dev/null; \
 		echo "Done"; \
 	fi
 
@@ -144,7 +137,7 @@ _start-server: setup
 # Private Test Tasks
 # ============================================================================
 
-_test-dql:
+_test-1million-dql:
 	@echo "=== DQL Relationship Tests ==="
 	@check_dql() { \
 		local name="$$1"; \
@@ -164,24 +157,3 @@ _test-dql:
 	check_dql "4. Genre reverse (~genre)" '{"query": "{ genres(func: has(~genre), first: 2) { name@. ~genre(first: 2) { name@. } } }"}'; \
 	check_dql "5. Country reverse (~country)" '{"query": "{ countries(func: has(~country), first: 2) { name@. ~country(first: 2) { name@. } } }"}'
 
-_test-graphql:
-	@echo "=== GraphQL Relationship Tests ==="
-	@check_gql() { \
-		local name="$$1"; \
-		local query="$$2"; \
-		response=$$(curl -s -X POST http://localhost:8080/graphql -H "Content-Type: application/json" -d "$$query"); \
-		if echo "$$response" | jq -e '.data' > /dev/null 2>&1 && ! echo "$$response" | jq -e '.errors' > /dev/null 2>&1; then \
-			echo "$$name: Success"; \
-		else \
-			echo "$$name: FAILED"; \
-			echo "$$response" | jq .; \
-			exit 1; \
-		fi; \
-	}; \
-	check_gql "1. Film -> relationships" '{"query": "{ queryFilm(first: 2) { name tagline initial_release_date genre { name } country { name } rating { name } rated { name } starring(first: 2) { character_note } } }"}'; \
-	check_gql "2. Director -> Film" '{"query": "{ queryDirector(first: 2) { name films(first: 2) { name genre { name } } } }"}'; \
-	check_gql "3. Actor -> Performance" '{"query": "{ queryActor(first: 2) { name films(first: 2) { character_note } } }"}'; \
-	check_gql "4. Genre -> Film (reverse)" '{"query": "{ queryGenre(first: 2) { name films(first: 2) { name } } }"}'; \
-	check_gql "5. Country -> Film (reverse)" '{"query": "{ queryCountry(first: 2) { name films(first: 2) { name } } }"}'; \
-	check_gql "6. Rating -> Film (reverse)" '{"query": "{ queryRating(first: 2) { name films(first: 2) { name } } }"}'; \
-	check_gql "7. ContentRating -> Film (reverse)" '{"query": "{ queryContentRating(first: 2) { name films(first: 2) { name } } }"}'
