@@ -10,7 +10,8 @@ Visit https://dgraph.io/tour for the running instance.
 
 ### Prerequisites
 
-`make` is pre-installed on macOS and most Linux distributions.
+- `make` (pre-installed on macOS and most Linux distributions)
+- Docker
 
 ### Quick Start
 
@@ -26,28 +27,43 @@ make start
 
 The tour will be available at http://localhost:8000/
 
-### Available Tasks
+### Available Commands
 
-| Task | Description |
-|------|-------------|
+| Command | Description |
+|---------|-------------|
 | `make setup` | Install dependencies, start Dgraph, and load sample data |
 | `make start` | Start Hugo development server with hot reload |
 | `make stop` | Stop Hugo server and Dgraph containers |
 | `make restart` | Restart Hugo server and Dgraph containers |
 | `make reset` | Reset Dgraph data and reload sample dataset |
-| `make test` | Run all DQL and GraphQL tests |
-| `make docker-compose-up` | Start Dgraph and Ratel containers |
-| `make docker-compose-down` | Stop Dgraph and Ratel containers |
+| `make test` | Run all tests (DQL + GraphQL) |
+| `make docker-up` | Start Dgraph and Ratel containers |
+| `make docker-down` | Stop Dgraph and Ratel containers |
 
-Run `make help` to see all available tasks.
+Run `make help` to see all available commands.
 
-### Services
+### Local Services
 
 When running locally, the following services are available:
 
-- **Hugo Tour**: http://localhost:8000/ - The tutorial site
-- **Dgraph Alpha**: http://localhost:8080/ - GraphQL and DQL endpoints
-- **Ratel UI**: http://localhost:8001/ - Dgraph query interface
+| Service | URL | Description |
+|---------|-----|-------------|
+| Hugo Tour | http://localhost:8000/ | The tutorial site |
+| Dgraph Alpha | http://localhost:8080/ | GraphQL and DQL endpoints |
+| Ratel UI | http://localhost:8001/ | Dgraph query interface |
+
+### Testing
+
+The test suite validates all tour examples work correctly:
+
+```bash
+make test
+```
+
+This runs:
+- `test_1million_dataset.sh` - Validates movie dataset relationships
+- `test_tour_dql.sh` - Tests all DQL examples (42 tests)
+- `test_tour_graphql.sh` - Tests all GraphQL examples (33 tests)
 
 ### Legacy Development
 
