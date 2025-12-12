@@ -11,116 +11,25 @@
 
 <div class="dgraph-header">
   <div class="header-container">
-    <a href="{{ .Site.Params.url.dgraphHome }}" aria-current="page" class="dgraph_logo">
+    <a href="/" aria-current="page" class="dgraph_logo">
       <div class="nav_logo-embed w-embed">
         <img src='{{ relURL "/images/DgraphByHypermode_light.svg" }}' alt="Dgraph by Hypermode logo" height="38" width="123" />
       </div>
     </a>
 
     <nav role="navigation" class="dgraph-menu">
-      <a href="{{ .Site.Params.url.dgraphProduct }}" class="navigation-link">
-        <div>Product</div>
+      <a href="/" class="navigation-link">
+        <div>Tour</div>
       </a>
-      <a href="{{ .Site.Params.url.dgraphSolutions }}" class="navigation-link">
-        <div>Solutions</div>
+      <a href="https://discuss.dgraph.io" class="navigation-link">
+        <div>Discuss</div>
       </a>
-      <a href="{{ .Site.Params.url.dgraphDocs }}" class="navigation-link">
+      <a href="https://github.com/dgraph-io/dgraph" class="navigation-link">
+        <div>GitHub</div>
+      </a>
+      <a href="https://docs.dgraph.io" class="navigation-link">
         <div>Docs</div>
       </a>
-      <div class="navigation-link has-submenu">
-        <div class="nav_dropdown-toggle">
-          <div>Resources</div>
-          <div class="nav_dropdown-arrow">
-            <div class="arrow-embed w-embed">
-              <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M13 1L7.00005 6.99995L1 1" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path>
-              </svg>
-            </div>
-          </div>
-        </div>
-        <div class="nav-submenu nav-mega-menu">
-          <div class="nav-submenu-container">
-            <div class="nav-submenu-column">
-              <div class="nav-submenu-title">Learn</div>
-              <div class="nav-submenu-list">
-                <div class="nav-submenu-list-item">
-                  <a href="{{ .Site.Params.url.dgraphDocs }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="nav-submenu-list-item-arrow" width="15" height="14" viewBox="0 0 15 14" fill="none">
-                      <path d="M1 7H13.5M13.5 7L7.5 1M13.5 7L7.5 13" stroke="#EF265A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div class="nav-submenu-list-item-title">Docs</div>
-                    <div class="nav-submenu-list-item-subtitle">Documents and tutorials to get you started with Dgraph</div>
-                  </a>
-                </div>
-                <div class="nav-submenu-list-item">
-                  <a href="{{ .Site.Params.url.dgraphTour }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="nav-submenu-list-item-arrow" width="15" height="14" viewBox="0 0 15 14" fill="none">
-                      <path d="M1 7H13.5M13.5 7L7.5 1M13.5 7L7.5 13" stroke="#EF265A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div class="nav-submenu-list-item-title">Tour</div>
-                    <div class="nav-submenu-list-item-subtitle">Documents and tutorials to get you started with Dgraph</div>
-                  </a>
-                </div>
-              </div>
-            </div>
-            <div class="nav-submenu-column">
-              <div class="nav-submenu-title">Resources</div>
-              <div class="nav-submenu-list">
-                <div class="nav-submenu-list-item">
-                  <a href="{{ .Site.Params.url.dgraphBlog }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="nav-submenu-list-item-arrow" width="15" height="14" viewBox="0 0 15 14" fill="none">
-                      <path d="M1 7H13.5M13.5 7L7.5 1M13.5 7L7.5 13" stroke="#EF265A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div class="nav-submenu-list-item-title">Blog</div>
-                    <div class="nav-submenu-list-item-subtitle">The latest news and articles from Dgraph team</div>
-                  </a>
-                </div>
-                <div class="nav-submenu-list-item">
-                  <a href="{{ .Site.Params.url.dgraphPaper }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="nav-submenu-list-item-arrow" width="15" height="14" viewBox="0 0 15 14" fill="none">
-                      <path d="M1 7H13.5M13.5 7L7.5 1M13.5 7L7.5 13" stroke="#EF265A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div class="nav-submenu-list-item-title">Whitepapers</div>
-                    <div class="nav-submenu-list-item-subtitle">Dgraph most valuable insights and discoveries.</div>
-                  </a>
-                </div>
-                <div class="nav-submenu-list-item">
-                  <a href="{{ .Site.Params.url.dgraphCaseStudies }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="nav-submenu-list-item-arrow" width="15" height="14" viewBox="0 0 15 14" fill="none">
-                      <path d="M1 7H13.5M13.5 7L7.5 1M13.5 7L7.5 13" stroke="#EF265A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div class="nav-submenu-list-item-title">Case Studies</div>
-                    <div class="nav-submenu-list-item-subtitle">Real-world scenarios where Dgraph added value</div>
-                  </a>
-                </div>
-              </div>
-            </div>
-            <div class="nav-submenu-column">
-              <div class="nav-submenu-title">Collaborate</div>
-              <div class="nav-submenu-list">
-                <div class="nav-submenu-list-item">
-                  <a href="{{ .Site.Params.url.dgraphForum }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="nav-submenu-list-item-arrow" width="15" height="14" viewBox="0 0 15 14" fill="none">
-                      <path d="M1 7H13.5M13.5 7L7.5 1M13.5 7L7.5 13" stroke="#EF265A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div class="nav-submenu-list-item-title">Forum</div>
-                    <div class="nav-submenu-list-item-subtitle">The latest news and articles from Dgraph team</div>
-                  </a>
-                </div>
-                <div class="nav-submenu-list-item">
-                  <a href="{{ .Site.Params.url.dgraphCommunity }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="nav-submenu-list-item-arrow" width="15" height="14" viewBox="0 0 15 14" fill="none">
-                      <path d="M1 7H13.5M13.5 7L7.5 1M13.5 7L7.5 13" stroke="#EF265A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div class="nav-submenu-list-item-title">Commmunity</div>
-                    <div class="nav-submenu-list-item-subtitle">Become part of a community passionate about building better apps.</div>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </nav>
 
     <div class="nav_tablet-left">
