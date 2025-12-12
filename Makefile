@@ -55,7 +55,7 @@ reset: ## Reset Dgraph data and reload sample dataset
 # Testing
 # =============================================================================
 
-test: reset test-1million-dataset test-tour ## Run all tests
+test: reset test-1million-dataset test-tour reset ## Run all tests
 
 test-1million-dataset: ## Test 1million dataset relationships
 	@./tests/test_1million_dataset.sh

@@ -1,6 +1,6 @@
 services:
   dgraph:
-    image: dgraph/standalone:v24.1.4
+    image: dgraph/standalone:latest
     container_name: tour-dgraph
     ports:
       - "8080:8080"
