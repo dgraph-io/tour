@@ -8,7 +8,7 @@ SHELL := /bin/bash
 # Mark all targets as phony (not files)
 .PHONY: help setup start stop restart reset test docker-compose-up docker-compose-down \
         _deps-darwin _deps-linux-apt _docker-dgraph-dir _cluster-up _cluster-down \
-        _schema-and-data _start-server _test-1million-dql
+        _schema-and-data _start-server _test-1million-dql _test-tour-examples
 
 # ============================================================================
 # Public Tasks
@@ -50,7 +50,7 @@ reset: _cluster-down
 	@$(MAKE) setup
 
 ## Run DQL tests
-test: _test-1million-dql
+test: _test-1million-dql _test-tour-examples
 
 ## Start Dgraph and Ratel containers
 docker-compose-up:
@@ -157,3 +157,5 @@ _test-1million-dql:
 	check_dql "4. Genre reverse (~genre)" '{"query": "{ genres(func: has(~genre), first: 2) { name@. ~genre(first: 2) { name@. } } }"}'; \
 	check_dql "5. Country reverse (~country)" '{"query": "{ countries(func: has(~country), first: 2) { name@. ~country(first: 2) { name@. } } }"}'
 
+_test-tour-examples:
+	@./tests/test_tour_dql_queries.sh
