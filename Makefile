@@ -84,7 +84,8 @@ test-data: ## Test 1million dataset relationships
 
 .PHONY: test-tour
 test-tour: ## Test tour example queries
-	@./tests/test_tour_dql_queries.sh
+	@./tests/test_tour_dql.sh
+	@./tests/test_tour_graphql.sh
 
 # =============================================================================
 # Docker

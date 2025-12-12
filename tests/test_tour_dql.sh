@@ -3,7 +3,7 @@
 # Test script that runs each DQL .txt file from the tour in order and verifies
 # they complete successfully against a local Dgraph instance.
 #
-# Usage: ./tests/test_tour_dql_queries.sh
+# Usage: ./tests/test_tour_dql.sh
 #
 # Requirements:
 #   - Dgraph running at localhost:8080
