@@ -7,7 +7,7 @@
     # Note: You need to know the value/Object to use "S P O". Otherwise use "S P *".
 
     # Delete an edge for a given node "S P O".
-    <0x1c3eb> <friend> <1x1c2a1> .
+    <0x1c3eb> <friend> <0x1c2a1> .
 
     # Delete all triples for a given edge "S P *".
     <0x1c3eb> <friend> * .
