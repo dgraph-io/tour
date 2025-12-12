@@ -110,12 +110,14 @@ deps:
 		(command -v brew &> /dev/null) || { echo "Installing Homebrew..." && /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; }; \
 		(command -v hugo &> /dev/null) || { echo "Installing hugo..." && brew install hugo; }; \
 		(command -v docker &> /dev/null) || { echo "Installing docker..." && brew install --cask docker; }; \
+		(command -v jq &> /dev/null) || { echo "Installing jq..." && brew install jq; }; \
 		(command -v node &> /dev/null) || { echo "Installing node..." && brew install node; }; \
 		(command -v npm &> /dev/null) || { echo "Installing npm..." && brew install npm; }; \
 		(command -v npx &> /dev/null) || { echo "Installing npx..." && npm install -g npx; }; \
 	elif command -v apt &> /dev/null; then \
 		(command -v hugo &> /dev/null) || sudo apt install -y hugo; \
 		(command -v docker &> /dev/null) || sudo apt install -y docker.io; \
+		(command -v jq &> /dev/null) || sudo apt install -y jq; \
 		(command -v node &> /dev/null) || sudo apt install -y nodejs; \
 		(command -v npm &> /dev/null) || sudo apt install -y npm; \
 		(command -v npx &> /dev/null) || { echo "Installing npx..." && sudo npm install -g npx; }; \
