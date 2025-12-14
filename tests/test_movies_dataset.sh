@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# Test script that verifies the 1million dataset relationships are loaded correctly.
+# Test script that verifies the movies dataset relationships are loaded correctly.
 #
-# Usage: ./tests/test_1million_dataset.sh
+# Usage: ./tests/test_movies_dataset.sh
 #
 # Requirements:
 #   - Dgraph running at localhost:8080

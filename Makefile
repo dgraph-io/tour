@@ -8,8 +8,8 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 .DEFAULT_GOAL := help
 
-.PHONY: help setup start stop restart reset test test-1million-dataset test-tour \
-        docker-up docker-down deps docker-dir load-1million-dataset server
+.PHONY: help setup start stop restart reset test test-tour-dql test-tour-graphql \
+        test-movies-dataset docker-up docker-down deps docker-dir load-movies-dataset server
 
 # Configuration
 DGRAPH_ALPHA := http://localhost:8080
@@ -29,7 +29,7 @@ help: ## Show this help message
 # Development
 # =============================================================================
 
-setup: deps docker-dir docker-up load-1million-dataset ## Install dependencies, start Dgraph, and load sample data
+setup: deps docker-dir docker-up ## Install dependencies and start Dgraph
 
 start: setup server ## Start Hugo development server with hot reload
 
@@ -44,7 +44,7 @@ stop: ## Stop Hugo server and Dgraph containers
 
 restart: stop start ## Restart Hugo server and Dgraph containers
 
-reset: ## Reset Dgraph data and reload sample dataset
+reset: ## Reset Dgraph data to empty state
 	@if docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
 		docker compose down; \
 	fi
@@ -55,14 +55,16 @@ reset: ## Reset Dgraph data and reload sample dataset
 # Testing
 # =============================================================================
 
-test: reset test-1million-dataset test-tour reset ## Run all tests
+test: setup test-tour-dql test-tour-graphql load-movies-dataset test-movies-dataset ## Run all tests
 
-test-1million-dataset: ## Test 1million dataset relationships
-	@./tests/test_1million_dataset.sh
-
-test-tour:
+test-tour-dql: ## Run DQL tour tests
 	@./tests/test_tour_dql.sh
+
+test-tour-graphql: ## Run GraphQL tour tests
 	@./tests/test_tour_graphql.sh
+
+test-movies-dataset: ## Test movies dataset relationships
+	@./tests/test_movies_dataset.sh
 
 # =============================================================================
 # Docker
@@ -101,7 +103,7 @@ deps:
 docker-dir:
 	@[[ -d docker/dgraph ]] || mkdir -p docker/dgraph
 
-load-1million-dataset: docker-up
+load-movies-dataset: docker-up ## Load the movies dataset into Dgraph
 	@echo "Waiting for Dgraph to be ready..."
 	@until curl -s $(DGRAPH_ALPHA)/health | grep -q '"status":"healthy"'; do \
 		sleep 1; \
@@ -112,7 +114,7 @@ load-1million-dataset: docker-up
 	done
 	@count=$$(curl -s -H "Content-Type: application/json" "$(DGRAPH_ALPHA)/query" -d '{"query": "{ count(func: has(genre), first: 1) { count(uid) } }"}' | grep -o '"count":[0-9]\+' | tail -1 | grep -o '[0-9]\+' || echo "0"); \
 	if [[ "$$count" == "0" || -z "$$count" ]]; then \
-		echo "Loading DQL schema and data..."; \
+		echo "Loading movies schema and data..."; \
 		[[ -s docker/dgraph/1million.rdf.gz ]] || cp resources/1million.rdf.gz docker/dgraph/; \
 		[[ -s docker/dgraph/1million.schema ]] || cp resources/1million.schema docker/dgraph/; \
 		docker exec tour-dgraph dgraph live -f 1million.rdf.gz -s 1million.schema; \
