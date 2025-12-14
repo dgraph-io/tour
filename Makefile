@@ -9,7 +9,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 .PHONY: help setup start stop restart reset test test-tour-dql test-tour-graphql \
-        test-movies-dataset docker-up docker-down deps docker-dir load-movies-dataset server
+        test-movies-dataset docker-up docker-down deps docker-dir dgraph-healthy load-tour-dataset load-movies-dataset server
 
 # Configuration
 DGRAPH_ALPHA := http://localhost:8080
@@ -103,15 +103,46 @@ deps:
 docker-dir:
 	@[[ -d docker/dgraph ]] || mkdir -p docker/dgraph
 
-load-movies-dataset: docker-up ## Load the movies dataset into Dgraph
-	@echo "Waiting for Dgraph to be ready..."
-	@until curl -s $(DGRAPH_ALPHA)/health | grep -q '"status":"healthy"'; do \
+dgraph-healthy: docker-up
+	@timeout=60; while ! curl -s $(DGRAPH_ALPHA)/health | grep -q '"status":"healthy"'; do \
 		sleep 1; \
+		timeout=$$((timeout - 1)); \
+		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for health endpoint to report healthy status (GET $(DGRAPH_ALPHA)/health)"; exit 1; fi; \
 	done
-	@echo "Waiting for GraphQL admin..."
-	@until curl -s -X POST $(DGRAPH_ALPHA)/admin -H "Content-Type: application/json" -d '{"query":"{ health { status } }"}' | grep -q '"status":"healthy"'; do \
+	@timeout=60; while ! curl -s -X POST $(DGRAPH_ALPHA)/admin -H "Content-Type: application/json" -d '{"query":"{ health { status } }"}' | grep -q '"status":"healthy"'; do \
 		sleep 1; \
+		timeout=$$((timeout - 1)); \
+		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for admin endpoint to report healthy status (POST $(DGRAPH_ALPHA)/admin)"; exit 1; fi; \
 	done
+
+load-tour-dataset: dgraph-healthy ## Load the tour sample dataset (DQL + GraphQL)
+	@echo "Loading tour DQL schema..."
+	@response=$$(curl -s -X POST $(DGRAPH_ALPHA)/alter -H "Content-Type: application/rdf" --data-binary @content/intro/2.txt); \
+	if ! echo "$$response" | jq -e '.data.code == "Success"' > /dev/null 2>&1; then \
+		echo "Failed to load DQL schema: $$response"; exit 1; \
+	fi
+	@echo "Loading tour example data..."
+	@response=$$(curl -s -X POST $(DGRAPH_ALPHA)/mutate?commitNow=true -H "Content-Type: application/rdf" --data-binary @content/intro/3.txt); \
+	if ! echo "$$response" | jq -e '.data.code == "Success"' > /dev/null 2>&1; then \
+		echo "Failed to load tour data: $$response"; exit 1; \
+	fi
+	@echo "Loading GraphQL schema..."
+	@schema_content=$$(cat content/graphqlintro/2.txt); \
+	mutation=$$(jq -n --arg schema "$$schema_content" '{query:"mutation($$schema: String!) { updateGQLSchema(input: { set: { schema: $$schema } }) { gqlSchema { schema } } }", variables:{schema:$$schema}}'); \
+	response=$$(curl -s -X POST $(DGRAPH_ALPHA)/admin -H "Content-Type: application/json" -d "$$mutation"); \
+	if echo "$$response" | jq -e '.errors' > /dev/null 2>&1 || ! echo "$$response" | jq -e '.data.updateGQLSchema.gqlSchema.schema' > /dev/null 2>&1; then \
+		echo "Failed to load GraphQL schema: $$response"; exit 1; \
+	fi
+	@echo "Loading GraphQL example data..."
+	@mutation_content=$$(cat content/graphqlintro/3.txt); \
+	payload=$$(jq -n --arg query "$$mutation_content" '{query:$$query}'); \
+	response=$$(curl -s -X POST $(DGRAPH_ALPHA)/graphql -H "Content-Type: application/json" -d "$$payload"); \
+	if echo "$$response" | jq -e '.errors' > /dev/null 2>&1 || ! echo "$$response" | jq -e '.data' > /dev/null 2>&1; then \
+		echo "Failed to load GraphQL example data: $$response"; exit 1; \
+	fi
+	@echo "Tour dataset loaded."
+
+load-movies-dataset: dgraph-healthy ## Load the movies dataset into Dgraph
 	@count=$$(curl -s -H "Content-Type: application/json" "$(DGRAPH_ALPHA)/query" -d '{"query": "{ count(func: has(genre), first: 1) { count(uid) } }"}' | grep -o '"count":[0-9]\+' | tail -1 | grep -o '[0-9]\+' || echo "0"); \
 	if [[ "$$count" == "0" || -z "$$count" ]]; then \
 		echo "Loading movies schema and data..."; \
