@@ -5,82 +5,82 @@ theme="hugo-tutorials"
 canonifyURLs = false
 
 [[menu.main]]
-  name = "GraphQL Introduction"
-  url = "/graphqlintro/1/"
-  identifier = "graphqlintro"
-  weight = 1
-  [menu.main.params]
-    time = "9 min."
-[[menu.main]]
-  name = "GraphQL Basic Features"
-  url = "/graphqlbasic/1/"
-  identifier = "graphqlbasic"
-  weight = 2
-  [menu.main.params]
-    time = "22 min."
-[[menu.main]]
-  name = "GraphQL Schema"
-  url = "/graphqlschema/1/"
-  identifier = "graphqlschema"
-  weight = 3
-  [menu.main.params]
-    time = "11 min."
-[[menu.main]]
-  name = "GraphQL Search"
-  url = "/graphqlsearch/1/"
-  identifier = "graphqlsearch"
-  weight = 4
-  [menu.main.params]
-    time = "7 min."
-[[menu.main]]
-  name = "GraphQL Data and More Data"
-  url = "/graphqlmoredata/1/"
-  identifier = "graphqlmoredata"
-  weight = 5
-  [menu.main.params]
-    time = "6 min."
-[[menu.main]]
   name = "DQL Introduction"
   url = "/intro/1/"
   identifier = "intro"
-  weight = 6
+  weight = 1
   [menu.main.params]
     time = "9 min."
 [[menu.main]]
   name = "DQL Basic Features"
   url = "/basic/1/"
   identifier = "basic"
-  weight = 7
+  weight = 2
   [menu.main.params]
     time = "18 min."
 [[menu.main]]
   name = "DQL Schema"
   url = "/schema/1/"
   identifier = "schema"
-  weight = 8
+  weight = 3
   [menu.main.params]
     time = "13 min."
 [[menu.main]]
   name = "DQL Data and More Data"
   url = "/moredata/1/"
   identifier = "moredata"
-  weight = 9
+  weight = 4
   [menu.main.params]
     time = "8 min."
 [[menu.main]]
   name = "DQL Query Blocks and Variables"
   url = "/blocksvars/1/"
   identifier = "blocksvars"
-  weight = 10
+  weight = 5
   [menu.main.params]
     time = "12 min."
 [[menu.main]]
   name = "DQL Search"
   url = "/search/1/"
   identifier = "search"
-  weight = 11
+  weight = 6
   [menu.main.params]
     time = "14 min."
+[[menu.main]]
+  name = "GraphQL Introduction"
+  url = "/graphqlintro/1/"
+  identifier = "graphqlintro"
+  weight = 7
+  [menu.main.params]
+    time = "9 min."
+[[menu.main]]
+  name = "GraphQL Basic Features"
+  url = "/graphqlbasic/1/"
+  identifier = "graphqlbasic"
+  weight = 8
+  [menu.main.params]
+    time = "22 min."
+[[menu.main]]
+  name = "GraphQL Schema"
+  url = "/graphqlschema/1/"
+  identifier = "graphqlschema"
+  weight = 9
+  [menu.main.params]
+    time = "11 min."
+[[menu.main]]
+  name = "GraphQL Search"
+  url = "/graphqlsearch/1/"
+  identifier = "graphqlsearch"
+  weight = 10
+  [menu.main.params]
+    time = "7 min."
+[[menu.main]]
+  name = "GraphQL Data and More Data"
+  url = "/graphqlmoredata/1/"
+  identifier = "graphqlmoredata"
+  weight = 11
+  [menu.main.params]
+    time = "6 min."
 
 
 
