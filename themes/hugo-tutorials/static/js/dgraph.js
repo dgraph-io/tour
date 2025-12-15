@@ -24,7 +24,11 @@ $(document).on('click', 'a[data-action="toggle-expandable"]', function (e) {
   $expandable.toggleClass('expanded');
 
   var isExpanded = $expandable.hasClass('expanded');
-  if (isExpanded) {
+  var $label = $toggle.find('.expandable-label');
+
+  if ($label.length) {
+    $toggle.html("<i class='fa fa-caret-" + (isExpanded ? "up" : "down") + "'></i> <span class='expandable-label'>" + (isExpanded ? "Hide" : "Show") + "</span>");
+  } else if (isExpanded) {
     $toggle.html("<i class='fa fa-caret-up'></i> Hide answer");
   } else {
     $toggle.html("<i class='fa fa-caret-down'></i> Show answer");
@@ -148,4 +152,3 @@ $(window).resize(function(){
 		$('.header').children().removeClass('container');
 	}
 })
-
