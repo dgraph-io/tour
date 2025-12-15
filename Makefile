@@ -9,7 +9,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 .PHONY: help setup start stop restart reset test test-tour-dql test-tour-graphql \
-        test-movies-dataset docker-up docker-down deps docker-dir dgraph-healthy seed-intro-data seed-movies-data server \
+        test-movie-dataset docker-up docker-down deps docker-dir dgraph-healthy seed-intro-dataset seed-movie-dataset server \
         seed-basic-facets
 
 # Configuration
@@ -56,7 +56,7 @@ reset: ## Reset Dgraph data to empty state
 # Testing
 # =============================================================================
 
-test: setup test-tour-dql test-tour-graphql seed-movies-data test-movies-dataset ## Run all tests
+test: setup test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset ## Run all tests
 
 test-tour-dql: ## Run DQL tour tests
 	@./tests/test_tour_dql.sh
@@ -64,7 +64,7 @@ test-tour-dql: ## Run DQL tour tests
 test-tour-graphql: ## Run GraphQL tour tests
 	@./tests/test_tour_graphql.sh
 
-test-movies-dataset: ## Test movies dataset relationships
+test-movie-dataset: ## Test movies dataset relationships
 	@./tests/test_movies_dataset.sh
 
 # =============================================================================
@@ -137,7 +137,7 @@ seed-basic-facets: dgraph-healthy ## Seed facet sample data for the facets lesso
 	fi
 	@echo "Facets sample data seeded successfully."
 
-seed-intro-data: dgraph-healthy ## Load the tour sample dataset (DQL + GraphQL)
+seed-intro-dataset: dgraph-healthy ## Load the tour sample dataset (DQL + GraphQL)
 	@echo "Loading tour DQL schema..."
 	@response=$$(curl -s -X POST $(DGRAPH_ALPHA)/alter -H "Content-Type: application/rdf" --data-binary @content/intro/2.txt); \
 	if ! echo "$$response" | jq -e '.data.code == "Success"' > /dev/null 2>&1; then \
@@ -164,7 +164,7 @@ seed-intro-data: dgraph-healthy ## Load the tour sample dataset (DQL + GraphQL)
 	fi
 	@echo "Tour dataset loaded."
 
-seed-movies-data: dgraph-healthy ## Load the movies dataset into Dgraph
+seed-movie-dataset: dgraph-healthy ## Load the movies dataset into Dgraph
 	@count=$$(curl -s -H "Content-Type: application/json" "$(DGRAPH_ALPHA)/query" -d '{"query": "{ count(func: has(genre), first: 1) { count(uid) } }"}' | grep -o '"count":[0-9]\+' | tail -1 | grep -o '[0-9]\+' || echo "0"); \
 	if [[ "$$count" == "0" || -z "$$count" ]]; then \
 		echo "Loading movies schema and data..."; \
