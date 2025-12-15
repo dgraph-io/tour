@@ -1,15 +1,12 @@
 {
-  A as not_a_real_query(...) {
-    B as some_edge @filter(...) { # can't use C or B in this filter
-      C as ... { 
-        # A, B and C here
-      }
-
-      # A, B and C here
-    }
-
-    # A, B and C can be used in any blocks here
+  # Define a variable 'SF' containing all Steven Spielberg films
+  var(func: allofterms(name@en, "Steven Spielberg")) {
+    SF as director.film
   }
 
-  # A, B and C can be used in any other query block
+  # Use the variable to query those films
+  spielberg_films(func: uid(SF)) {
+    name@en
+    initial_release_date
+  }
 }
