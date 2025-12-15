@@ -9,7 +9,8 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 .PHONY: help setup start stop restart reset test test-tour-dql test-tour-graphql \
-        test-movies-dataset docker-up docker-down deps docker-dir dgraph-healthy load-tour-dataset load-movies-dataset server
+        test-movies-dataset docker-up docker-down deps docker-dir dgraph-healthy seed-intro-data seed-movies-data server \
+        seed-basic-facets
 
 # Configuration
 DGRAPH_ALPHA := http://localhost:8080
@@ -55,7 +56,7 @@ reset: ## Reset Dgraph data to empty state
 # Testing
 # =============================================================================
 
-test: setup test-tour-dql test-tour-graphql load-movies-dataset test-movies-dataset ## Run all tests
+test: setup test-tour-dql test-tour-graphql seed-movies-data test-movies-dataset ## Run all tests
 
 test-tour-dql: ## Run DQL tour tests
 	@./tests/test_tour_dql.sh
@@ -115,7 +116,28 @@ dgraph-healthy: docker-up
 		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for admin endpoint to report healthy status (POST $(DGRAPH_ALPHA)/admin)"; exit 1; fi; \
 	done
 
-load-tour-dataset: dgraph-healthy ## Load the tour sample dataset (DQL + GraphQL)
+seed-basic-facets: dgraph-healthy ## Seed facet sample data for the facets lesson
+	@echo "=== Seeding Facet Sample Data ==="
+	@echo ""
+	@echo "This mutation adds sample data with facets (edge attributes) for the facets lesson."
+	@echo "Facets allow you to store key-value pairs on edges, not just nodes."
+	@echo ""
+	@echo "Request: POST $(DGRAPH_ALPHA)/mutate?commitNow=true"
+	@echo "Content-Type: application/rdf"
+	@echo ""
+	@echo "Payload (contents of resources/facets.rdf):"
+	@echo "─────────────────────────────────"
+	@cat resources/facets.rdf
+	@echo "─────────────────────────────────"
+	@echo ""
+	@echo "Executing mutation..."
+	@response=$$(curl -s -X POST $(DGRAPH_ALPHA)/mutate?commitNow=true -H "Content-Type: application/rdf" --data-binary @resources/facets.rdf); \
+	if ! echo "$$response" | jq -e '.data.code == "Success"' > /dev/null 2>&1; then \
+		echo "Failed to load facets data: $$response"; exit 1; \
+	fi
+	@echo "Facets sample data seeded successfully."
+
+seed-intro-data: dgraph-healthy ## Load the tour sample dataset (DQL + GraphQL)
 	@echo "Loading tour DQL schema..."
 	@response=$$(curl -s -X POST $(DGRAPH_ALPHA)/alter -H "Content-Type: application/rdf" --data-binary @content/intro/2.txt); \
 	if ! echo "$$response" | jq -e '.data.code == "Success"' > /dev/null 2>&1; then \
@@ -142,7 +164,7 @@ load-tour-dataset: dgraph-healthy ## Load the tour sample dataset (DQL + GraphQL
 	fi
 	@echo "Tour dataset loaded."
 
-load-movies-dataset: dgraph-healthy ## Load the movies dataset into Dgraph
+seed-movies-data: dgraph-healthy ## Load the movies dataset into Dgraph
 	@count=$$(curl -s -H "Content-Type: application/json" "$(DGRAPH_ALPHA)/query" -d '{"query": "{ count(func: has(genre), first: 1) { count(uid) } }"}' | grep -o '"count":[0-9]\+' | tail -1 | grep -o '[0-9]\+' || echo "0"); \
 	if [[ "$$count" == "0" || -z "$$count" ]]; then \
 		echo "Loading movies schema and data..."; \
