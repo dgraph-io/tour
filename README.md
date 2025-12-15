@@ -1,11 +1,6 @@
 # A Tour of Dgraph
 
-A step by step introductory tutorial of Dgraph. Built with [Hugo](https://gohugo.io/).
-
-Visit https://dgraph.io/tour for the running instance.
-
-**Use [Discuss Issues](https://discuss.dgraph.io/tags/c/issues/35/tutorial) for reporting issues about this repository.**
-
+A step by step introductory tutorial of Dgraph.
 ## Local Development
 
 ### Prerequisites
