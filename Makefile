@@ -177,4 +177,7 @@ seed-movie-dataset: dgraph-healthy ## Load the movies dataset into Dgraph
 	fi
 
 server:
+	@(while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do sleep 0.5; done; \
+		if [[ "$$(uname)" == "Darwin" ]]; then open http://localhost:$(HUGO_PORT)/; \
+		else xdg-open http://localhost:$(HUGO_PORT)/ 2>/dev/null || true; fi) &
 	hugo server -w --baseURL=http://localhost:$(HUGO_PORT)/ --config config.toml,releases.json
