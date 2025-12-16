@@ -20,7 +20,7 @@ make setup
 make start
 ```
 
-The tour will be available at http://localhost:8000/
+The tour will be available at http://localhost:1313/
 
 ### Available Commands
 
@@ -43,9 +43,9 @@ When running locally, the following services are available:
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| Hugo Tour | http://localhost:8000/ | The tutorial site |
+| Hugo Tour | http://localhost:1313/ | The tutorial site |
 | Dgraph Alpha | http://localhost:8080/ | GraphQL and DQL endpoints |
-| Ratel UI | http://localhost:8001/ | Dgraph query interface |
+| Ratel UI | http://localhost:8000/ | Dgraph query interface |
 
 ### Testing
 

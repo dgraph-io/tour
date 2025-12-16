@@ -14,7 +14,7 @@ SHELL := /bin/bash
 
 # Configuration
 DGRAPH_ALPHA := http://localhost:8080
-HUGO_PORT := 8000
+HUGO_PORT := 1313
 
 # =============================================================================
 # Help
