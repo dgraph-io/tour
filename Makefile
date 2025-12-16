@@ -70,7 +70,7 @@ reset: ## Reset Dgraph data to empty state
 # Testing
 # =============================================================================
 
-test: setup check-external-links test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset ## Run all tests
+test: reset check-external-links test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset ## Run all tests
 
 test-tour-dql: ## Run DQL tour tests
 	@./tests/test_tour_dql.sh
