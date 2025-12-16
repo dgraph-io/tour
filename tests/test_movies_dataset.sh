@@ -29,6 +29,7 @@ check_dql() {
     else
         echo -e "${RED}FAIL${NC}  $name"
         echo "$response" | jq .
+        echo -e "${RED}Some movie dataset tests failed!${NC}"
         exit 1
     fi
 }
@@ -40,4 +41,4 @@ check_dql "4. Genre reverse (~genre)" '{"query": "{ genres(func: has(~genre), fi
 check_dql "5. Country reverse (~country)" '{"query": "{ countries(func: has(~country), first: 2) { name@. ~country(first: 2) { name@. } } }"}'
 
 echo ""
-echo -e "${GREEN}All relationship tests passed!${NC}"
+echo -e "${GREEN}All movie dataset tests passed!${NC}"

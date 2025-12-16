@@ -310,10 +310,10 @@ main() {
     echo ""
 
     if [[ $FAILED -gt 0 ]]; then
-        echo -e "${RED}Some tests failed!${NC}"
+        echo -e "${RED}Some DQL tests failed!${NC}"
         exit 1
     else
-        echo -e "${GREEN}All tests passed!${NC}"
+        echo -e "${GREEN}All DQL tests passed!${NC}"
         exit 0
     fi
 }
