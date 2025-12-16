@@ -8,3 +8,4 @@ published/node_modules/
 published/*/node_modules/
 
 docker/dgraph/
+.project
