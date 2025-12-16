@@ -1,5 +1,0 @@
-{
-  peters(func: allofterms(name@en, "Peter Jackson")) {
-    name@en
-  }
-}

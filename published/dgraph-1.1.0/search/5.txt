@@ -1,7 +1,0 @@
-{
-  movie(func:alloftext(name@en, "the man runs"))
-    @filter(has(genre))
-  {
-    name@en
-  }
-}

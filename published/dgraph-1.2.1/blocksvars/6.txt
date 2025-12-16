@@ -1,8 +1,0 @@
-{
-	# some hints for your query
-
-	# find the movies and actors for each director
-	# and store those in variables
-
-	# then join them up in a third query
-}

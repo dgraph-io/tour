@@ -1,7 +1,0 @@
-{
-  have_friends(func: has(friend)) {
-    name@.
-    age
-    number_of_friends : count(friend)
-  }
-}

@@ -1,9 +1,0 @@
-{
-  michael_and_pet_name(func: allofterms(name@., "Michael")) @normalize {
-    name : name
-    age
-    owns_pet {
-      pet: name
-    }
-  }
-}

@@ -1,9 +1,0 @@
-{
-  movie(func:alloftext(name@de, "Die schwarz"))
-    @filter(has(genre))
-  {
-    name@de
-    name@en
-    name@it
-  }
-}

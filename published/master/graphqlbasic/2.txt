@@ -1,9 +1,0 @@
-{
-  getPerson(xid: "alice") {
-    name
-    age
-    friends {
-      name
-    }
-  }
-}
