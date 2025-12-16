@@ -1,0 +1,24 @@
+# Git
+.git
+.gitignore
+
+# Build outputs
+public/
+published/
+
+# Docker
+docker/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.project
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db

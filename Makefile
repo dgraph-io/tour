@@ -8,9 +8,9 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 .DEFAULT_GOAL := help
 
-.PHONY: help setup start stop restart reset test test-tour-dql test-tour-graphql \
-        test-movie-dataset docker-up docker-down deps docker-dir dgraph-healthy seed-intro-dataset seed-movie-dataset server \
-        seed-basic-facets check-external-links
+.PHONY: help setup start dev-start stop restart reset test test-tour-dql test-tour-graphql \
+        test-movie-dataset docker-up docker-down deps docker-dir dgraph-healthy tour-ready seed-intro-dataset seed-movie-dataset server \
+        seed-basic-facets check-external-links test-tour-links
 
 # Configuration
 DGRAPH_ALPHA := http://localhost:8080
@@ -20,12 +20,14 @@ HUGO_PORT := 1313
 LYCHEE_LOCAL := $(shell command -v lychee 2>/dev/null)
 ifdef LYCHEE_LOCAL
   LYCHEE := lychee
-  LYCHEE_CONFIG := lychee.toml
+  LYCHEE_TEMPLATES_CONFIG := lychee-templates.toml
+  LYCHEE_TOUR_CONFIG := lychee-tour.toml
   LYCHEE_ROOT := .
   LYCHEE_CONTENT := 'content/**/*.md' 'themes/**/layouts/**/*.html'
 else
   LYCHEE := docker run --rm -v "$(PWD):/input:ro" lycheeverse/lychee
-  LYCHEE_CONFIG := /input/lychee.toml
+  LYCHEE_TEMPLATES_CONFIG := /input/lychee-templates.toml
+  LYCHEE_TOUR_CONFIG := /input/lychee-tour.toml
   LYCHEE_ROOT := /input
   LYCHEE_CONTENT := '/input/content/**/*.md' '/input/themes/**/layouts/**/*.html'
 endif
@@ -46,7 +48,14 @@ help: ## Show this help message
 
 setup: deps docker-dir docker-up ## Install dependencies and start Dgraph
 
-start: setup server ## Start Hugo development server with hot reload
+start: docker-up tour-ready ## Start all services via Docker and open browser
+	@if command -v open &> /dev/null; then \
+		open http://localhost:$(HUGO_PORT)/; \
+	else \
+		echo "Dgraph tour is running! To take the tour, open http://localhost:$(HUGO_PORT)/ in a browser"; \
+	fi
+
+dev-start: setup server ## Start Hugo development server locally with hot reload
 
 stop: ## Stop Hugo server and Dgraph containers
 	@if pgrep -f "hugo server" > /dev/null; then \
@@ -83,7 +92,11 @@ test-movie-dataset: ## Test movies dataset relationships
 
 check-external-links: ## Check external links in markdown and HTML files
 	@echo "Checking external links..."
-	@$(LYCHEE) --no-progress --config $(LYCHEE_CONFIG) --root-dir $(LYCHEE_ROOT) $(LYCHEE_CONTENT)
+	@$(LYCHEE) --no-progress --config $(LYCHEE_TEMPLATES_CONFIG) --root-dir $(LYCHEE_ROOT) $(LYCHEE_CONTENT)
+
+test-tour-links: reset start ## Test all links in running tour instance
+	@echo "Checking links in running tour at http://localhost:$(HUGO_PORT)/..."
+	@$(LYCHEE) --no-progress --config $(LYCHEE_TOUR_CONFIG) "http://localhost:$(HUGO_PORT)/"
 
 # =============================================================================
 # Docker
@@ -133,6 +146,13 @@ dgraph-healthy: docker-up
 		sleep 1; \
 		timeout=$$((timeout - 1)); \
 		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for admin endpoint to report healthy status (POST $(DGRAPH_ALPHA)/admin)"; exit 1; fi; \
+	done
+
+tour-ready:
+	@timeout=120; while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do \
+		sleep 1; \
+		timeout=$$((timeout - 1)); \
+		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for Hugo to be ready at http://localhost:$(HUGO_PORT)/"; exit 1; fi; \
 	done
 
 seed-basic-facets: dgraph-healthy ## Seed facet sample data for the facets lesson
