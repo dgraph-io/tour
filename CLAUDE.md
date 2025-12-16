@@ -25,9 +25,9 @@ python3 scripts/build.py
 ## Local Services
 
 When running `make start`, the following services are available:
-- **Hugo Tour**: http://localhost:8000/ - The tutorial site
+- **Hugo Tour**: http://localhost:1313/ - The tutorial site
 - **Dgraph Alpha**: http://localhost:8080/ - GraphQL and DQL endpoints
-- **Ratel UI**: http://localhost:8001/ - Dgraph query interface
+- **Ratel UI**: http://localhost:8000/ - Dgraph query interface
 
 ## Testing
 
