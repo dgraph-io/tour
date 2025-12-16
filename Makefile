@@ -10,11 +10,25 @@ SHELL := /bin/bash
 
 .PHONY: help setup start stop restart reset test test-tour-dql test-tour-graphql \
         test-movie-dataset docker-up docker-down deps docker-dir dgraph-healthy seed-intro-dataset seed-movie-dataset server \
-        seed-basic-facets
+        seed-basic-facets check-external-links
 
 # Configuration
 DGRAPH_ALPHA := http://localhost:8080
 HUGO_PORT := 1313
+
+# Use local lychee if available, otherwise use Docker
+LYCHEE_LOCAL := $(shell command -v lychee 2>/dev/null)
+ifdef LYCHEE_LOCAL
+  LYCHEE := lychee
+  LYCHEE_CONFIG := lychee.toml
+  LYCHEE_ROOT := .
+  LYCHEE_CONTENT := 'content/**/*.md' 'themes/**/layouts/**/*.html'
+else
+  LYCHEE := docker run --rm -v "$(PWD):/input:ro" lycheeverse/lychee
+  LYCHEE_CONFIG := /input/lychee.toml
+  LYCHEE_ROOT := /input
+  LYCHEE_CONTENT := '/input/content/**/*.md' '/input/themes/**/layouts/**/*.html'
+endif
 
 # =============================================================================
 # Help
@@ -56,7 +70,7 @@ reset: ## Reset Dgraph data to empty state
 # Testing
 # =============================================================================
 
-test: setup test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset ## Run all tests
+test: setup check-external-links test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset ## Run all tests
 
 test-tour-dql: ## Run DQL tour tests
 	@./tests/test_tour_dql.sh
@@ -66,6 +80,10 @@ test-tour-graphql: ## Run GraphQL tour tests
 
 test-movie-dataset: ## Test movies dataset relationships
 	@./tests/test_movies_dataset.sh
+
+check-external-links: ## Check external links in markdown and HTML files
+	@echo "Checking external links..."
+	@$(LYCHEE) --no-progress --config $(LYCHEE_CONFIG) --root-dir $(LYCHEE_ROOT) $(LYCHEE_CONTENT)
 
 # =============================================================================
 # Docker
@@ -92,6 +110,7 @@ deps:
 		(command -v node &> /dev/null) || { echo "Installing node..." && brew install node; }; \
 		(command -v npm &> /dev/null) || { echo "Installing npm..." && brew install npm; }; \
 		(command -v npx &> /dev/null) || { echo "Installing npx..." && npm install -g npx; }; \
+		(command -v lychee &> /dev/null) || { echo "Installing lychee..." && brew install lychee; }; \
 	elif command -v apt &> /dev/null; then \
 		(command -v hugo &> /dev/null) || sudo apt install -y hugo; \
 		(command -v docker &> /dev/null) || sudo apt install -y docker.io; \
