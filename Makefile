@@ -8,9 +8,13 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 .DEFAULT_GOAL := help
 
-.PHONY: help dev-setup start stop dev-start dev-stop dev-restart reset test test-tour-dql test-tour-graphql \
-        test-movie-dataset docker-up docker-stop deps-start deps-dev docker-dgraph-dir dgraph-ready tour-ready seed-intro-dataset seed-movie-dataset hugo-start \
-        seed-basic-facets test-template-links test-tour-links hugo-stop docker-dgraph-dir-clean
+.PHONY: help \
+        start stop reset \
+        dev-setup dev-start dev-stop dev-restart \
+        test test-template-links test-tour-dql test-tour-graphql test-movie-dataset test-tour-links \
+        docker-up docker-stop \
+        seed-basic-facets seed-intro-dataset seed-movie-dataset \
+        deps-start deps-dev docker-dgraph-dir docker-dgraph-dir-clean dgraph-ready tour-ready hugo-start hugo-stop
 
 # Configuration
 DGRAPH_ALPHA := http://localhost:8080
@@ -43,10 +47,8 @@ help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
 
 # =============================================================================
-# Development
+# Tour (Docker-based)
 # =============================================================================
-
-dev-setup: deps-dev docker-dgraph-dir ## Install dev dependencies and start Dgraph
 
 start: deps-start docker-dgraph-dir docker-up dgraph-ready tour-ready ## Start the tour
 	@if command -v open &> /dev/null; then \
@@ -57,29 +59,29 @@ start: deps-start docker-dgraph-dir docker-up dgraph-ready tour-ready ## Start t
 
 stop: docker-stop ## Stop the tour
 
-dev-start: dev-setup docker-up dgraph-ready hugo-start ## Sets-up dev s Hugo development server locally with hot reload
-
-dev-stop: docker-stop hugo-stop ## Stop Hugo server and Dgraph containers
-
-
-hugo-stop:
-	@if pgrep -f "hugo server" > /dev/null; then \
-		echo "Stopping Hugo server..."; \
-		pkill -f "hugo server" || true; \
-	fi
-
-dev-restart: dev-stop dev-start ## Restart Hugo server and Dgraph containers
-
-docker-dgraph-dir-clean:
-	@[[ -d docker/dgraph ]] && (rm -rf docker/dgraph 2>/dev/null || docker run --rm -v "$(PWD)/docker:/data" alpine rm -rf /data/dgraph) || true
-
 reset: docker-stop hugo-stop docker-dgraph-dir-clean ## Reset Dgraph data
+
+# =============================================================================
+# Development (local Hugo with hot reload)
+# =============================================================================
+
+dev-setup: deps-dev docker-dgraph-dir ## Install dev dependencies
+
+dev-start: dev-setup docker-up dgraph-ready hugo-start ## Start Hugo dev server with hot reload
+
+dev-stop: docker-stop hugo-stop ## Stop Hugo server and Docker containers
+
+dev-restart: dev-stop dev-start ## Restart dev environment
 
 # =============================================================================
 # Testing
 # =============================================================================
 
 test: test-template-links test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset test-tour-links ## Run all tests
+
+test-template-links: ## Check external links in markdown and HTML files
+	@echo "Checking external links..."
+	@$(LYCHEE) --no-progress --config $(LYCHEE_TEMPLATES_CONFIG) --root-dir $(LYCHEE_ROOT) $(LYCHEE_CONTENT)
 
 test-tour-dql: reset start ## Run DQL tour tests
 	@./tests/test_tour_dql.sh
@@ -90,10 +92,6 @@ test-tour-graphql: reset start ## Run GraphQL tour tests
 test-movie-dataset: reset start ## Test movies dataset relationships
 	@./tests/test_movies_dataset.sh
 
-test-template-links: ## Check external links in markdown and HTML files
-	@echo "Checking external links..."
-	@$(LYCHEE) --no-progress --config $(LYCHEE_TEMPLATES_CONFIG) --root-dir $(LYCHEE_ROOT) $(LYCHEE_CONTENT)
-
 test-tour-links: reset start ## Test all links in running tour instance
 	@echo "Checking links in running tour at http://localhost:$(HUGO_PORT)/..."
 	@$(LYCHEE) --no-progress --config $(LYCHEE_TOUR_CONFIG) "http://localhost:$(HUGO_PORT)/"
@@ -102,68 +100,19 @@ test-tour-links: reset start ## Test all links in running tour instance
 # Docker
 # =============================================================================
 
-docker-up: ## Start Dgraph and Ratel containers
+docker-up: ## Start Docker containers
 	@if ! docker compose ps --status running 2>/dev/null | grep -q tour-; then \
 		docker compose up -d; \
 	fi
 
-docker-stop: ## Stop Dgraph and Ratel containers
+docker-stop: ## Stop Docker containers
 	@if docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
 		docker compose down; \
 	fi
 
 # =============================================================================
-# Internal targets (not shown in help)
+# Data Seeding
 # =============================================================================
-
-deps-start:
-	@if [[ "$$(uname)" == "Darwin" ]]; then \
-		if ! command -v docker &> /dev/null; then \
-			(command -v brew &> /dev/null) || { echo "Installing Homebrew..." && /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; }; \
-			echo "Installing docker..." && brew install --cask docker; \
-		fi; \
-	elif command -v apt &> /dev/null; then \
-		(command -v docker &> /dev/null) || sudo apt install -y docker.io; \
-	fi
-
-deps-dev: deps-start
-	@if [[ "$$(uname)" == "Darwin" ]]; then \
-		(command -v brew &> /dev/null) || { echo "Installing Homebrew..." && /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; }; \
-		(command -v hugo &> /dev/null) || { echo "Installing hugo..." && brew install hugo; }; \
-		(command -v jq &> /dev/null) || { echo "Installing jq..." && brew install jq; }; \
-		(command -v node &> /dev/null) || { echo "Installing node..." && brew install node; }; \
-		(command -v npm &> /dev/null) || { echo "Installing npm..." && brew install npm; }; \
-		(command -v npx &> /dev/null) || { echo "Installing npx..." && npm install -g npx; }; \
-		(command -v lychee &> /dev/null) || { echo "Installing lychee..." && brew install lychee; }; \
-	elif command -v apt &> /dev/null; then \
-		(command -v hugo &> /dev/null) || sudo apt install -y hugo; \
-		(command -v jq &> /dev/null) || sudo apt install -y jq; \
-		(command -v node &> /dev/null) || sudo apt install -y nodejs; \
-		(command -v npm &> /dev/null) || sudo apt install -y npm; \
-		(command -v npx &> /dev/null) || { echo "Installing npx..." && sudo npm install -g npx; }; \
-	fi
-
-docker-dgraph-dir:
-	@[[ -d docker/dgraph ]] || mkdir -p docker/dgraph
-
-dgraph-ready:
-	@timeout=60; while ! curl -s $(DGRAPH_ALPHA)/health | grep -q '"status":"healthy"'; do \
-		sleep 1; \
-		timeout=$$((timeout - 1)); \
-		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for health endpoint to report healthy status (GET $(DGRAPH_ALPHA)/health)"; exit 1; fi; \
-	done
-	@timeout=60; while ! curl -s -X POST $(DGRAPH_ALPHA)/admin -H "Content-Type: application/json" -d '{"query":"{ health { status } }"}' | grep -q '"status":"healthy"'; do \
-		sleep 1; \
-		timeout=$$((timeout - 1)); \
-		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for admin endpoint to report healthy status (POST $(DGRAPH_ALPHA)/admin)"; exit 1; fi; \
-	done
-
-tour-ready:
-	@timeout=120; while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do \
-		sleep 1; \
-		timeout=$$((timeout - 1)); \
-		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for Hugo to be ready at http://localhost:$(HUGO_PORT)/"; exit 1; fi; \
-	done
 
 seed-basic-facets: dgraph-ready ## Seed facet sample data for the facets lesson
 	@echo "=== Seeding Facet Sample Data ==="
@@ -225,8 +174,70 @@ seed-movie-dataset: dgraph-ready ## Load the movies dataset into Dgraph
 		echo "Done"; \
 	fi
 
+# =============================================================================
+# Internal targets (not shown in help)
+# =============================================================================
+
+deps-start:
+	@if [[ "$$(uname)" == "Darwin" ]]; then \
+		if ! command -v docker &> /dev/null; then \
+			(command -v brew &> /dev/null) || { echo "Installing Homebrew..." && /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; }; \
+			echo "Installing docker..." && brew install --cask docker; \
+		fi; \
+	elif command -v apt &> /dev/null; then \
+		(command -v docker &> /dev/null) || sudo apt install -y docker.io; \
+	fi
+
+deps-dev: deps-start
+	@if [[ "$$(uname)" == "Darwin" ]]; then \
+		(command -v brew &> /dev/null) || { echo "Installing Homebrew..." && /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; }; \
+		(command -v hugo &> /dev/null) || { echo "Installing hugo..." && brew install hugo; }; \
+		(command -v jq &> /dev/null) || { echo "Installing jq..." && brew install jq; }; \
+		(command -v node &> /dev/null) || { echo "Installing node..." && brew install node; }; \
+		(command -v npm &> /dev/null) || { echo "Installing npm..." && brew install npm; }; \
+		(command -v npx &> /dev/null) || { echo "Installing npx..." && npm install -g npx; }; \
+		(command -v lychee &> /dev/null) || { echo "Installing lychee..." && brew install lychee; }; \
+	elif command -v apt &> /dev/null; then \
+		(command -v hugo &> /dev/null) || sudo apt install -y hugo; \
+		(command -v jq &> /dev/null) || sudo apt install -y jq; \
+		(command -v node &> /dev/null) || sudo apt install -y nodejs; \
+		(command -v npm &> /dev/null) || sudo apt install -y npm; \
+		(command -v npx &> /dev/null) || { echo "Installing npx..." && sudo npm install -g npx; }; \
+	fi
+
+docker-dgraph-dir:
+	@[[ -d docker/dgraph ]] || mkdir -p docker/dgraph
+
+docker-dgraph-dir-clean:
+	@[[ -d docker/dgraph ]] && (rm -rf docker/dgraph 2>/dev/null || docker run --rm -v "$(PWD)/docker:/data" alpine rm -rf /data/dgraph) || true
+
+dgraph-ready:
+	@timeout=60; while ! curl -s $(DGRAPH_ALPHA)/health | grep -q '"status":"healthy"'; do \
+		sleep 1; \
+		timeout=$$((timeout - 1)); \
+		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for health endpoint to report healthy status (GET $(DGRAPH_ALPHA)/health)"; exit 1; fi; \
+	done
+	@timeout=60; while ! curl -s -X POST $(DGRAPH_ALPHA)/admin -H "Content-Type: application/json" -d '{"query":"{ health { status } }"}' | grep -q '"status":"healthy"'; do \
+		sleep 1; \
+		timeout=$$((timeout - 1)); \
+		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for admin endpoint to report healthy status (POST $(DGRAPH_ALPHA)/admin)"; exit 1; fi; \
+	done
+
+tour-ready:
+	@timeout=120; while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do \
+		sleep 1; \
+		timeout=$$((timeout - 1)); \
+		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for Hugo to be ready at http://localhost:$(HUGO_PORT)/"; exit 1; fi; \
+	done
+
 hugo-start:
 	@(while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do sleep 0.5; done; \
 		if [[ "$$(uname)" == "Darwin" ]]; then open http://localhost:$(HUGO_PORT)/; \
 		else xdg-open http://localhost:$(HUGO_PORT)/ 2>/dev/null || true; fi) &
 	hugo server -w --port $(HUGO_PORT) --baseURL=http://localhost:$(HUGO_PORT)/ - --config config.toml,releases.json
+
+hugo-stop:
+	@if pgrep -f "hugo server" > /dev/null; then \
+		echo "Stopping Hugo server..."; \
+		pkill -f "hugo server" || true; \
+	fi
