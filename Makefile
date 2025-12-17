@@ -68,7 +68,7 @@ reset: ## Reset Dgraph data
 
 dev-setup: deps-dev docker-dgraph-dir ## Install dev dependencies
 
-dev-start: dev-setup docker-up dgraph-ready ## Start Hugo dev server with hot reload
+dev-start: dev-setup docker-up dgraph-ready hugo-ready ## Start Hugo dev server with hot reload
 
 dev-stop: docker-down ## Stop Hugo server and Docker containers
 
