@@ -38,7 +38,7 @@ jobs:
           sudo apt-get install -y jq nodejs npm
 
       - name: Run tests
-        run: make setup test
+        run: make test
 
   spellcheck:
     name: Spellcheck
