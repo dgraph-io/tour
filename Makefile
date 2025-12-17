@@ -14,7 +14,7 @@ SHELL := /bin/bash
         test test-template-links test-tour-dql test-tour-graphql test-movie-dataset test-tour-links \
         docker-up docker-stop \
         seed-basic-facets seed-intro-dataset seed-movie-dataset \
-        deps-start deps-dev docker-dgraph-dir docker-dgraph-dir-clean dgraph-ready tour-ready hugo-start hugo-stop
+        deps-start deps-dev docker-dgraph-dir docker-dgraph-dir-clean dgraph-ready tour-ready hugo-start hugo-ready hugo-stop
 
 # Configuration
 DGRAPH_ALPHA := http://localhost:8080
@@ -77,23 +77,26 @@ dev-restart: dev-stop dev-start ## Restart dev environment
 # Testing
 # =============================================================================
 
-test: deps-dev test-template-links test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset test-tour-links ## Run all tests
+test: reset deps-dev docker-up dgraph-ready hugo-ready test-template-links test-tour-links test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset ## Run all tests
 
-test-template-links: deps-dev ## Check external links in markdown and HTML files
-	@echo "Checking external links..."
+test-template-links:
+	@echo "Testing external link validity in templates..."
 	@$(LYCHEE) --no-progress --config $(LYCHEE_TEMPLATES_CONFIG) --root-dir $(LYCHEE_ROOT) $(LYCHEE_CONTENT)
 
-test-tour-dql: deps-dev reset start ## Run DQL tour tests
+test-tour-dql:
+	@echo "Testing tour DQL queries..."
 	@./tests/test_tour_dql.sh
 
-test-tour-graphql: deps-dev reset start ## Run GraphQL tour tests
+test-tour-graphql:
+	@echo "Testing tour graphql queries..."
 	@./tests/test_tour_graphql.sh
 
-test-movie-dataset: deps-dev reset start ## Test movies dataset relationships
+test-movie-dataset:
+	@echo "Testing movies dataset..."
 	@./tests/test_movies_dataset.sh
 
-test-tour-links: deps-dev reset start ## Test all links in running tour instance
-	@echo "Checking links in running tour at http://localhost:$(HUGO_PORT)/..."
+test-tour-links: 
+	@echo "Testing link validity in running tour at http://localhost:$(HUGO_PORT)/..."
 	@$(LYCHEE) --no-progress --config $(LYCHEE_TOUR_CONFIG) "http://localhost:$(HUGO_PORT)/"
 
 # =============================================================================
@@ -231,10 +234,14 @@ tour-ready:
 	done
 
 hugo-start:
-	@(while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do sleep 0.5; done; \
-		if [[ "$$(uname)" == "Darwin" ]]; then open http://localhost:$(HUGO_PORT)/; \
-		else xdg-open http://localhost:$(HUGO_PORT)/ 2>/dev/null || true; fi) &
 	hugo server -w --port $(HUGO_PORT) --baseURL=http://localhost:$(HUGO_PORT)/ - --config config.toml,releases.json
+
+hugo-ready:
+	@timeout=120; while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do \
+		sleep 1; \
+		timeout=$$((timeout - 1)); \
+		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for Hugo to be ready at http://localhost:$(HUGO_PORT)/"; exit 1; fi; \
+	done
 
 hugo-stop:
 	@if pgrep -x hugo > /dev/null; then \
