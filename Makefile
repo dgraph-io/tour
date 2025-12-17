@@ -8,9 +8,9 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 .DEFAULT_GOAL := help
 
-.PHONY: help setup start dev-start stop restart reset test test-tour-dql test-tour-graphql \
-        test-movie-dataset docker-up docker-down deps docker-dir dgraph-healthy tour-ready seed-intro-dataset seed-movie-dataset server \
-        seed-basic-facets check-external-links test-tour-links
+.PHONY: help dev-setup start stop dev-start dev-stop dev-restart reset test test-tour-dql test-tour-graphql \
+        test-movie-dataset docker-up docker-stop deps-start deps-dev docker-dgraph-dir dgraph-ready tour-ready seed-intro-dataset seed-movie-dataset hugo-start \
+        seed-basic-facets test-template-links test-tour-links hugo-stop docker-dgraph-dir-clean
 
 # Configuration
 DGRAPH_ALPHA := http://localhost:8080
@@ -46,51 +46,51 @@ help: ## Show this help message
 # Development
 # =============================================================================
 
-setup: deps docker-dir docker-up ## Install dependencies and start Dgraph
+dev-setup: deps-dev docker-dgraph-dir ## Install dev dependencies and start Dgraph
 
-start: docker-up tour-ready ## Start all services via Docker and open browser
+start: deps-start docker-dgraph-dir docker-up dgraph-ready tour-ready ## Start the tour
 	@if command -v open &> /dev/null; then \
 		open http://localhost:$(HUGO_PORT)/; \
 	else \
-		echo "Dgraph tour is running! To take the tour, open http://localhost:$(HUGO_PORT)/ in a browser"; \
+		echo "To take the tour, open http://localhost:$(HUGO_PORT)/ in a browser"; \
 	fi
 
-dev-start: setup server ## Start Hugo development server locally with hot reload
+stop: docker-stop ## Stop the tour
 
-stop: ## Stop Hugo server and Dgraph containers
+dev-start: dev-setup docker-up dgraph-ready hugo-start ## Sets-up dev s Hugo development server locally with hot reload
+
+dev-stop: docker-stop hugo-stop ## Stop Hugo server and Dgraph containers
+
+
+hugo-stop:
 	@if pgrep -f "hugo server" > /dev/null; then \
 		echo "Stopping Hugo server..."; \
 		pkill -f "hugo server" || true; \
 	fi
-	@if docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
-		docker compose down; \
-	fi
 
-restart: stop start ## Restart Hugo server and Dgraph containers
+dev-restart: dev-stop dev-start ## Restart Hugo server and Dgraph containers
 
-reset: ## Reset Dgraph data to empty state
-	@if docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
-		docker compose down; \
-	fi
+docker-dgraph-dir-clean:
 	@[[ -d docker/dgraph ]] && (rm -rf docker/dgraph 2>/dev/null || docker run --rm -v "$(PWD)/docker:/data" alpine rm -rf /data/dgraph) || true
-	@$(MAKE) setup
+
+reset: docker-stop hugo-stop docker-dgraph-dir-clean ## Reset Dgraph data
 
 # =============================================================================
 # Testing
 # =============================================================================
 
-test: reset check-external-links test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset ## Run all tests
+test: test-template-links test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset test-tour-links ## Run all tests
 
-test-tour-dql: ## Run DQL tour tests
+test-tour-dql: reset start ## Run DQL tour tests
 	@./tests/test_tour_dql.sh
 
-test-tour-graphql: ## Run GraphQL tour tests
+test-tour-graphql: reset start ## Run GraphQL tour tests
 	@./tests/test_tour_graphql.sh
 
-test-movie-dataset: ## Test movies dataset relationships
+test-movie-dataset: reset start ## Test movies dataset relationships
 	@./tests/test_movies_dataset.sh
 
-check-external-links: ## Check external links in markdown and HTML files
+test-template-links: ## Check external links in markdown and HTML files
 	@echo "Checking external links..."
 	@$(LYCHEE) --no-progress --config $(LYCHEE_TEMPLATES_CONFIG) --root-dir $(LYCHEE_ROOT) $(LYCHEE_CONTENT)
 
@@ -103,22 +103,33 @@ test-tour-links: reset start ## Test all links in running tour instance
 # =============================================================================
 
 docker-up: ## Start Dgraph and Ratel containers
-	@if ! docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
+	@if ! docker compose ps --status running 2>/dev/null | grep -q tour-; then \
 		docker compose up -d; \
 	fi
 
-docker-down: ## Stop Dgraph and Ratel containers
-	docker compose down
+docker-stop: ## Stop Dgraph and Ratel containers
+	@if docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
+		docker compose down; \
+	fi
 
 # =============================================================================
 # Internal targets (not shown in help)
 # =============================================================================
 
-deps:
+deps-start:
+	@if [[ "$$(uname)" == "Darwin" ]]; then \
+		if ! command -v docker &> /dev/null; then \
+			(command -v brew &> /dev/null) || { echo "Installing Homebrew..." && /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; }; \
+			echo "Installing docker..." && brew install --cask docker; \
+		fi; \
+	elif command -v apt &> /dev/null; then \
+		(command -v docker &> /dev/null) || sudo apt install -y docker.io; \
+	fi
+
+deps-dev: deps-start
 	@if [[ "$$(uname)" == "Darwin" ]]; then \
 		(command -v brew &> /dev/null) || { echo "Installing Homebrew..." && /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; }; \
 		(command -v hugo &> /dev/null) || { echo "Installing hugo..." && brew install hugo; }; \
-		(command -v docker &> /dev/null) || { echo "Installing docker..." && brew install --cask docker; }; \
 		(command -v jq &> /dev/null) || { echo "Installing jq..." && brew install jq; }; \
 		(command -v node &> /dev/null) || { echo "Installing node..." && brew install node; }; \
 		(command -v npm &> /dev/null) || { echo "Installing npm..." && brew install npm; }; \
@@ -126,17 +137,16 @@ deps:
 		(command -v lychee &> /dev/null) || { echo "Installing lychee..." && brew install lychee; }; \
 	elif command -v apt &> /dev/null; then \
 		(command -v hugo &> /dev/null) || sudo apt install -y hugo; \
-		(command -v docker &> /dev/null) || sudo apt install -y docker.io; \
 		(command -v jq &> /dev/null) || sudo apt install -y jq; \
 		(command -v node &> /dev/null) || sudo apt install -y nodejs; \
 		(command -v npm &> /dev/null) || sudo apt install -y npm; \
 		(command -v npx &> /dev/null) || { echo "Installing npx..." && sudo npm install -g npx; }; \
 	fi
 
-docker-dir:
+docker-dgraph-dir:
 	@[[ -d docker/dgraph ]] || mkdir -p docker/dgraph
 
-dgraph-healthy: docker-up
+dgraph-ready:
 	@timeout=60; while ! curl -s $(DGRAPH_ALPHA)/health | grep -q '"status":"healthy"'; do \
 		sleep 1; \
 		timeout=$$((timeout - 1)); \
@@ -155,7 +165,7 @@ tour-ready:
 		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for Hugo to be ready at http://localhost:$(HUGO_PORT)/"; exit 1; fi; \
 	done
 
-seed-basic-facets: dgraph-healthy ## Seed facet sample data for the facets lesson
+seed-basic-facets: dgraph-ready ## Seed facet sample data for the facets lesson
 	@echo "=== Seeding Facet Sample Data ==="
 	@echo ""
 	@echo "This mutation adds sample data with facets (edge attributes) for the facets lesson."
@@ -176,7 +186,7 @@ seed-basic-facets: dgraph-healthy ## Seed facet sample data for the facets lesso
 	fi
 	@echo "Facets sample data seeded successfully."
 
-seed-intro-dataset: dgraph-healthy ## Load the tour sample dataset (DQL + GraphQL)
+seed-intro-dataset: dgraph-ready ## Load the tour sample dataset (DQL + GraphQL)
 	@echo "Loading tour DQL schema..."
 	@response=$$(curl -s -X POST $(DGRAPH_ALPHA)/alter -H "Content-Type: application/rdf" --data-binary @content/intro/2.txt); \
 	if ! echo "$$response" | jq -e '.data.code == "Success"' > /dev/null 2>&1; then \
@@ -203,7 +213,7 @@ seed-intro-dataset: dgraph-healthy ## Load the tour sample dataset (DQL + GraphQ
 	fi
 	@echo "Tour dataset loaded."
 
-seed-movie-dataset: dgraph-healthy ## Load the movies dataset into Dgraph
+seed-movie-dataset: dgraph-ready ## Load the movies dataset into Dgraph
 	@count=$$(curl -s -H "Content-Type: application/json" "$(DGRAPH_ALPHA)/query" -d '{"query": "{ count(func: has(genre), first: 1) { count(uid) } }"}' | grep -o '"count":[0-9]\+' | tail -1 | grep -o '[0-9]\+' || echo "0"); \
 	if [[ "$$count" == "0" || -z "$$count" ]]; then \
 		echo "Loading movies schema and data..."; \
@@ -215,7 +225,7 @@ seed-movie-dataset: dgraph-healthy ## Load the movies dataset into Dgraph
 		echo "Done"; \
 	fi
 
-server:
+hugo-start:
 	@(while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do sleep 0.5; done; \
 		if [[ "$$(uname)" == "Darwin" ]]; then open http://localhost:$(HUGO_PORT)/; \
 		else xdg-open http://localhost:$(HUGO_PORT)/ 2>/dev/null || true; fi) &
