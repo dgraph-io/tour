@@ -29,7 +29,7 @@ ifdef LYCHEE_LOCAL
   LYCHEE_ROOT := .
   LYCHEE_CONTENT := 'content/**/*.md' 'themes/**/layouts/**/*.html'
 else
-  LYCHEE := docker run --rm -v "$(PWD):/input:ro" lycheeverse/lychee
+  LYCHEE := docker run --rm --network=host -v "$(PWD):/input:ro" lycheeverse/lychee
   LYCHEE_TEMPLATES_CONFIG := /input/lychee-templates.toml
   LYCHEE_TOUR_CONFIG := /input/lychee-tour.toml
   LYCHEE_ROOT := /input
@@ -51,15 +51,16 @@ help: ## Show this help message
 # =============================================================================
 
 start: deps-start docker-dgraph-dir docker-up dgraph-ready tour-ready ## Start the tour
-	@if command -v open &> /dev/null; then \
-		open http://localhost:$(HUGO_PORT)/; \
-	else \
-		echo "To take the tour, open http://localhost:$(HUGO_PORT)/ in a browser"; \
-	fi
+	@(command -v xdg-open &> /dev/null && xdg-open http://localhost:$(HUGO_PORT)/ 2>/dev/null) || \
+		(command -v open &> /dev/null && open http://localhost:$(HUGO_PORT)/ 2>/dev/null) || \
+		echo "To take the tour, open http://localhost:$(HUGO_PORT)/ in a browser"
 
 stop: docker-down ## Stop the tour
 
-reset: docker-down docker-dgraph-dir-clean ## Reset Dgraph data
+reset: ## Reset Dgraph data
+	@$(MAKE) docker-down
+	@$(MAKE) docker-dgraph-dir-clean
+	@$(MAKE) docker-dgraph-dir
 
 # =============================================================================
 # Development (local Hugo with hot reload)
@@ -77,25 +78,25 @@ dev-restart: dev-stop dev-start ## Restart dev environment
 # Testing
 # =============================================================================
 
-test: reset deps-dev docker-up dgraph-ready hugo-ready test-template-links test-tour-links test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset ## Run all tests
+test: reset deps-dev test-template-links test-tour-links test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset ## Run all tests
 
 test-template-links:
 	@echo "Testing external link validity in templates..."
 	@$(LYCHEE) --no-progress --config $(LYCHEE_TEMPLATES_CONFIG) --root-dir $(LYCHEE_ROOT) $(LYCHEE_CONTENT)
 
-test-tour-dql:
+test-tour-dql: dgraph-ready
 	@echo "Testing tour DQL queries..."
 	@./tests/test_tour_dql.sh
 
-test-tour-graphql:
+test-tour-graphql: dgraph-ready
 	@echo "Testing tour graphql queries..."
 	@./tests/test_tour_graphql.sh
 
-test-movie-dataset:
+test-movie-dataset: dgraph-ready
 	@echo "Testing movies dataset..."
 	@./tests/test_movies_dataset.sh
 
-test-tour-links: 
+test-tour-links: hugo-ready
 	@echo "Testing link validity in running tour at http://localhost:$(HUGO_PORT)/..."
 	@$(LYCHEE) --no-progress --config $(LYCHEE_TOUR_CONFIG) "http://localhost:$(HUGO_PORT)/"
 
@@ -215,7 +216,7 @@ docker-dgraph-dir-clean:
 	@echo "Cleaning dgraph docker data dir (docker/dgraph)"
 	@[[ -d docker/dgraph ]] && (rm -rf docker/dgraph 2>/dev/null || docker run --rm -v "$(PWD)/docker:/data" alpine rm -rf /data/dgraph) || true
 
-dgraph-ready:
+dgraph-ready: docker-up
 	@timeout=60; while ! curl -s $(DGRAPH_ALPHA)/health | grep -q '"status":"healthy"'; do \
 		sleep 1; \
 		timeout=$$((timeout - 1)); \
@@ -227,14 +228,14 @@ dgraph-ready:
 		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for admin endpoint to report healthy status (POST $(DGRAPH_ALPHA)/admin)"; exit 1; fi; \
 	done
 
-tour-ready:
+tour-ready: docker-up
 	@timeout=120; while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do \
 		sleep 1; \
 		timeout=$$((timeout - 1)); \
 		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for Hugo to be ready at http://localhost:$(HUGO_PORT)/"; exit 1; fi; \
 	done
 
-hugo-ready:
+hugo-ready: docker-up
 	@timeout=120; while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do \
 		sleep 1; \
 		timeout=$$((timeout - 1)); \
