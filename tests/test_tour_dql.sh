@@ -287,7 +287,7 @@ main() {
     echo ""
 
     for section in "${DQL_SECTIONS[@]}"; do
-        echo -e "${BLUE}=== Section: ${section} ===${NC}"
+        echo -e "${BLUE}=== Testing Tour Section: ${section} ===${NC}"
 
         # Read files into array to avoid stdin interference with curl
         local -a files=()
