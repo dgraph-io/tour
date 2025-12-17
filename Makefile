@@ -16,9 +16,9 @@ SHELL := /bin/bash
         seed-basic-facets seed-intro-dataset seed-movie-dataset \
         deps-start deps-dev docker-dgraph-dir docker-dgraph-dir-clean dgraph-ready hugo-ready
 
-# Configuration
-DGRAPH_ALPHA := http://localhost:8080
-HUGO_PORT := 1313
+# Configuration (use ?= to allow environment variable override)
+DGRAPH_ALPHA ?= http://localhost:8080
+HUGO_PORT ?= 1313
 
 # Use local lychee if available, otherwise use Docker
 LYCHEE_LOCAL := $(shell command -v lychee 2>/dev/null)
@@ -58,9 +58,10 @@ start: deps-start docker-dgraph-dir docker-up dgraph-ready hugo-ready ## Start t
 stop: docker-down ## Stop the tour
 
 reset: ## Reset Dgraph data
-	@$(MAKE) docker-down
-	@$(MAKE) docker-dgraph-dir-clean
-	@$(MAKE) docker-dgraph-dir
+	@[[ -f /.dockerenv ]] && exit 0; \
+	$(MAKE) docker-down && \
+	$(MAKE) docker-dgraph-dir-clean && \
+	$(MAKE) docker-dgraph-dir
 
 # =============================================================================
 # Development (local Hugo with hot reload)
@@ -105,12 +106,14 @@ test-tour-links: hugo-ready
 # =============================================================================
 
 docker-up: ## Start Docker containers
-	@if ! docker compose ps --status running 2>/dev/null | grep -q tour-; then \
+	@[[ -f /.dockerenv ]] && exit 0; \
+	if ! docker compose ps --status running 2>/dev/null | grep -q tour-; then \
 		docker compose up -d; \
 	fi
 
 docker-down: ## Stop Docker containers
-	@if docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
+	@[[ -f /.dockerenv ]] && exit 0; \
+	if docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
 		docker compose down; \
 	fi
 
@@ -170,11 +173,15 @@ seed-movie-dataset: dgraph-ready ## Load the movies dataset into Dgraph
 	@count=$$(curl -s -H "Content-Type: application/json" "$(DGRAPH_ALPHA)/query" -d '{"query": "{ count(func: has(genre), first: 1) { count(uid) } }"}' | grep -o '"count":[0-9]\+' | tail -1 | grep -o '[0-9]\+' || echo "0"); \
 	if [[ "$$count" == "0" || -z "$$count" ]]; then \
 		echo "Loading movies schema and data..."; \
-		[[ -s docker/dgraph/1million.rdf.gz ]] || cp resources/1million.rdf.gz docker/dgraph/; \
-		[[ -s docker/dgraph/1million.schema ]] || cp resources/1million.schema docker/dgraph/; \
-		docker exec tour-dgraph dgraph live -f 1million.rdf.gz -s 1million.schema; \
-		[[ -s docker/dgraph/1million.rdf.gz ]] && rm docker/dgraph/1million.rdf.gz || true; \
-		[[ -s docker/dgraph/1million.schema ]] && rm docker/dgraph/1million.schema || true; \
+		if [[ -f /.dockerenv ]]; then \
+			dgraph live -f resources/1million.rdf.gz -s resources/1million.schema --alpha tour-dgraph:9080; \
+		else \
+			[[ -s docker/dgraph/1million.rdf.gz ]] || cp resources/1million.rdf.gz docker/dgraph/; \
+			[[ -s docker/dgraph/1million.schema ]] || cp resources/1million.schema docker/dgraph/; \
+			docker exec tour-dgraph dgraph live -f 1million.rdf.gz -s 1million.schema; \
+			[[ -s docker/dgraph/1million.rdf.gz ]] && rm docker/dgraph/1million.rdf.gz || true; \
+			[[ -s docker/dgraph/1million.schema ]] && rm docker/dgraph/1million.schema || true; \
+		fi; \
 		echo "Done"; \
 	fi
 
@@ -190,6 +197,9 @@ deps-start:
 		fi; \
 	elif command -v apt &> /dev/null; then \
 		(command -v docker &> /dev/null) || sudo apt install -y docker.io; \
+	elif command -v apk &> /dev/null; then \
+		SUDO=""; [[ $$(id -u) -ne 0 ]] && SUDO="sudo"; \
+		(command -v docker &> /dev/null) || $$SUDO apk add --no-cache docker; \
 	fi
 
 deps-dev: deps-start
@@ -207,6 +217,13 @@ deps-dev: deps-start
 		(command -v node &> /dev/null) || sudo apt install -y nodejs; \
 		(command -v npm &> /dev/null) || sudo apt install -y npm; \
 		(command -v npx &> /dev/null) || { echo "Installing npx..." && sudo npm install -g npx; }; \
+	elif command -v apk &> /dev/null; then \
+		SUDO=""; [[ $$(id -u) -ne 0 ]] && SUDO="sudo"; \
+		(command -v hugo &> /dev/null) || $$SUDO apk add --no-cache hugo; \
+		(command -v jq &> /dev/null) || $$SUDO apk add --no-cache jq; \
+		(command -v node &> /dev/null) || $$SUDO apk add --no-cache nodejs; \
+		(command -v npm &> /dev/null) || $$SUDO apk add --no-cache npm; \
+		(command -v npx &> /dev/null) || { echo "Installing npx..." && $$SUDO npm install -g npx; }; \
 	fi
 
 docker-dgraph-dir:

@@ -23,7 +23,9 @@ services:
       - dgraph
 
   tour:
-    build: .
+    build:
+      context: .
+      target: tour-hugo
     container_name: tour-hugo
     ports:
       - "1313:1313"
@@ -34,6 +36,17 @@ services:
     environment:
       - DGRAPH_ALPHA=http://tour-dgraph:8080
       - HUGO_PORT=1313
+    depends_on:
+      dgraph:
+        condition: service_healthy
+
+  tour-seed:
+    build:
+      context: .
+      target: tour-seed
+    container_name: tour-seed
+    environment:
+      - DGRAPH_ALPHA=http://tour-dgraph:8080
     depends_on:
       dgraph:
         condition: service_healthy
