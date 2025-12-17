@@ -77,22 +77,22 @@ dev-restart: dev-stop dev-start ## Restart dev environment
 # Testing
 # =============================================================================
 
-test: test-template-links test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset test-tour-links ## Run all tests
+test: deps-dev test-template-links test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset test-tour-links ## Run all tests
 
-test-template-links: ## Check external links in markdown and HTML files
+test-template-links: deps-dev ## Check external links in markdown and HTML files
 	@echo "Checking external links..."
 	@$(LYCHEE) --no-progress --config $(LYCHEE_TEMPLATES_CONFIG) --root-dir $(LYCHEE_ROOT) $(LYCHEE_CONTENT)
 
-test-tour-dql: reset start ## Run DQL tour tests
+test-tour-dql: deps-dev reset start ## Run DQL tour tests
 	@./tests/test_tour_dql.sh
 
-test-tour-graphql: reset start ## Run GraphQL tour tests
+test-tour-graphql: deps-dev reset start ## Run GraphQL tour tests
 	@./tests/test_tour_graphql.sh
 
-test-movie-dataset: reset start ## Test movies dataset relationships
+test-movie-dataset: deps-dev reset start ## Test movies dataset relationships
 	@./tests/test_movies_dataset.sh
 
-test-tour-links: reset start ## Test all links in running tour instance
+test-tour-links: deps-dev reset start ## Test all links in running tour instance
 	@echo "Checking links in running tour at http://localhost:$(HUGO_PORT)/..."
 	@$(LYCHEE) --no-progress --config $(LYCHEE_TOUR_CONFIG) "http://localhost:$(HUGO_PORT)/"
 
