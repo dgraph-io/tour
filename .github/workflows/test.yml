@@ -16,6 +16,9 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+
       - name: Install Hugo
         uses: peaceiris/actions-hugo@v3
         with:
