@@ -14,7 +14,7 @@ SHELL := /bin/bash
         test test-template-links test-tour-dql test-tour-graphql test-movie-dataset test-tour-links \
         docker-up docker-down \
         seed-basic-facets seed-intro-dataset seed-movie-dataset \
-        deps-start deps-dev docker-dgraph-dir docker-dgraph-dir-clean dgraph-ready tour-ready hugo-ready
+        deps-start deps-dev docker-dgraph-dir docker-dgraph-dir-clean dgraph-ready hugo-ready
 
 # Configuration
 DGRAPH_ALPHA := http://localhost:8080
@@ -50,7 +50,7 @@ help: ## Show this help message
 # Tour (Docker-based)
 # =============================================================================
 
-start: deps-start docker-dgraph-dir docker-up dgraph-ready tour-ready ## Start the tour
+start: deps-start docker-dgraph-dir docker-up dgraph-ready hugo-ready ## Start the tour
 	@(command -v xdg-open &> /dev/null && xdg-open http://localhost:$(HUGO_PORT)/ 2>/dev/null) || \
 		(command -v open &> /dev/null && open http://localhost:$(HUGO_PORT)/ 2>/dev/null) || \
 		echo "To take the tour, open http://localhost:$(HUGO_PORT)/ in a browser"
@@ -226,13 +226,6 @@ dgraph-ready: docker-up
 		sleep 1; \
 		timeout=$$((timeout - 1)); \
 		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for admin endpoint to report healthy status (POST $(DGRAPH_ALPHA)/admin)"; exit 1; fi; \
-	done
-
-tour-ready: docker-up
-	@timeout=120; while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do \
-		sleep 1; \
-		timeout=$$((timeout - 1)); \
-		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for Hugo to be ready at http://localhost:$(HUGO_PORT)/"; exit 1; fi; \
 	done
 
 hugo-ready: docker-up
