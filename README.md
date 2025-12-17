@@ -1,51 +1,72 @@
 # A Tour of Dgraph
 
 A step by step introductory tutorial of Dgraph.
-## Local Development
+
+## Taking the Tour
 
 ### Prerequisites
 
-- `make` (pre-installed on macOS and most Linux distributions)
-- Docker
+- [Docker](https://docs.docker.com/get-docker/)
 
-### Quick Start
+### macOS / Linux
 
 ```bash
-# Clone and setup (installs dependencies, starts Dgraph, loads sample data)
-git clone https://github.com/dgraph-io/tutorial.git
-cd tutorial
-make setup
-
-# Start development server with hot reload
+git clone https://github.com/dgraph-io/tour.git
+cd tour
 make start
 ```
 
-The tour will be available at http://localhost:1313/
+The tour will automatically open in your browser.
 
-### Available Commands
+### Windows
 
-| Command | Description |
-|---------|-------------|
-| `make setup` | Install dependencies, start Dgraph, and load sample data |
-| `make start` | Start Hugo development server with hot reload |
-| `make stop` | Stop Hugo server and Dgraph containers |
-| `make restart` | Restart Hugo server and Dgraph containers |
-| `make reset` | Reset Dgraph data and reload sample dataset |
-| `make test` | Run all tests (DQL + GraphQL) |
-| `make docker-up` | Start Dgraph and Ratel containers |
-| `make docker-down` | Stop Dgraph and Ratel containers |
+```powershell
+git clone https://github.com/dgraph-io/tour.git
+cd tour
+docker compose up -d
+```
 
-Run `make help` to see all available commands.
+Then open http://localhost:1313/ in your browser.
 
-### Local Services
+### Stopping the Tour
 
-When running locally, the following services are available:
+**macOS / Linux:**
+```bash
+make stop
+```
+
+**Windows:**
+```powershell
+docker compose down
+```
+
+## Local Services
+
+When running the tour, the following services are available:
 
 | Service | URL | Description |
 |---------|-----|-------------|
 | Hugo Tour | http://localhost:1313/ | The tutorial site |
 | Dgraph Alpha | http://localhost:8080/ | GraphQL and DQL endpoints |
 | Ratel UI | http://localhost:8000/ | Dgraph query interface |
+
+## Development
+
+### Prerequisites
+
+- `make` (pre-installed on macOS and most Linux distributions)
+- Docker
+
+### Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `make start` | Start the tour |
+| `make stop` | Stop the tour |
+| `make reset` | Reset Dgraph data and reload sample dataset |
+| `make test` | Run all tests |
+
+Run `make help` to see all available commands.
 
 ### Testing
 
@@ -56,9 +77,10 @@ make test
 ```
 
 This runs:
-- `test_1million_dataset.sh` - Validates movie dataset relationships
-- `test_tour_dql.sh` - Tests all DQL examples (42 tests)
-- `test_tour_graphql.sh` - Tests all GraphQL examples (33 tests)
+- Link validation for templates and live tour
+- DQL query tests (42 tests)
+- GraphQL query tests (33 tests)
+- Movie dataset relationship tests
 
 ### Legacy Development
 
@@ -73,7 +95,7 @@ Structure of the tour releases/version switcher must mirror the structure of the
 
 ### Where to make changes
 
-- All changes/updates reflecting the changes in Dgraph master should be committed into the `master` branch of this repository (`dgraph-io/tutorial`).
+- All changes/updates reflecting the changes in Dgraph master should be committed into the `master` branch of this repository (`dgraph-io/tour`).
 - Fixes and changes for older versions of the tour should be committed into relevant `dgraph-$version` branch.
 - As part of the release process for Dgraph a new branch `dgraph-$version` must be cut here (`git checkout master; git checkout -b dgraph-<NEW_SEMVER>`).
 
