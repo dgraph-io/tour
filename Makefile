@@ -57,11 +57,13 @@ start: deps-start docker-dgraph-dir docker-up dgraph-ready hugo-ready ## Start t
 
 stop: docker-down ## Stop the tour
 
-reset: ## Reset Dgraph data
-	@[[ -f /.dockerenv ]] && exit 0; \
-	$(MAKE) docker-down && \
-	$(MAKE) docker-dgraph-dir-clean && \
-	$(MAKE) docker-dgraph-dir
+reset: dgraph-ready ## Reset Dgraph data (drop all data and schema)
+	@echo "Dropping all data and schema from Dgraph..."
+	@response=$$(curl -s -X POST $(DGRAPH_ALPHA)/alter -d '{"drop_all": true}'); \
+	if ! echo "$$response" | jq -e '.data.code == "Success"' > /dev/null 2>&1; then \
+		echo "Failed to drop data: $$response"; exit 1; \
+	fi
+	@echo "Dgraph data reset complete."
 
 # =============================================================================
 # Development (local Hugo with hot reload)
