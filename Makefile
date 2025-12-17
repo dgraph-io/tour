@@ -237,7 +237,7 @@ hugo-start:
 	hugo server -w --port $(HUGO_PORT) --baseURL=http://localhost:$(HUGO_PORT)/ - --config config.toml,releases.json
 
 hugo-stop:
-	@if pgrep -f "hugo server" > /dev/null; then \
+	@if pgrep -x hugo > /dev/null; then \
 		echo "Stopping Hugo server..."; \
-		pkill -f "hugo server" || true; \
+		pkill -x hugo || true; \
 	fi
