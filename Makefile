@@ -12,7 +12,7 @@ SHELL := /bin/bash
         start stop reset \
         dev-setup dev-start dev-stop dev-restart \
         test test-template-links test-tour-dql test-tour-graphql test-movie-dataset test-tour-links \
-        docker-up docker-stop \
+        docker-up docker-down \
         seed-basic-facets seed-intro-dataset seed-movie-dataset \
         deps-start deps-dev docker-dgraph-dir docker-dgraph-dir-clean dgraph-ready tour-ready hugo-ready
 
@@ -57,9 +57,9 @@ start: deps-start docker-dgraph-dir docker-up dgraph-ready tour-ready ## Start t
 		echo "To take the tour, open http://localhost:$(HUGO_PORT)/ in a browser"; \
 	fi
 
-stop: docker-stop ## Stop the tour
+stop: docker-down ## Stop the tour
 
-reset: docker-stop docker-dgraph-dir-clean ## Reset Dgraph data
+reset: docker-down docker-dgraph-dir-clean ## Reset Dgraph data
 
 # =============================================================================
 # Development (local Hugo with hot reload)
@@ -69,7 +69,7 @@ dev-setup: deps-dev docker-dgraph-dir ## Install dev dependencies
 
 dev-start: dev-setup docker-up dgraph-ready ## Start Hugo dev server with hot reload
 
-dev-stop: docker-stop ## Stop Hugo server and Docker containers
+dev-stop: docker-down ## Stop Hugo server and Docker containers
 
 dev-restart: dev-stop dev-start ## Restart dev environment
 
@@ -108,7 +108,7 @@ docker-up: ## Start Docker containers
 		docker compose up -d; \
 	fi
 
-docker-stop: ## Stop Docker containers
+docker-down: ## Stop Docker containers
 	@if docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
 		docker compose down; \
 	fi
