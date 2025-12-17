@@ -236,7 +236,7 @@ tour-ready: docker-up
 	done
 
 hugo-ready: docker-up
-	@timeout=120; while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do \
+	@timeout=60; while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do \
 		sleep 1; \
 		timeout=$$((timeout - 1)); \
 		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for Hugo to be ready at http://localhost:$(HUGO_PORT)/"; exit 1; fi; \

@@ -9,7 +9,14 @@ RUN apk add --no-cache \
     git
 
 # Install Hugo (standard version - extended requires glibc)
-RUN wget -qO- https://github.com/gohugoio/hugo/releases/download/v0.139.0/hugo_0.139.0_linux-amd64.tar.gz \
+# Detect architecture and download appropriate binary
+ARG TARGETARCH
+RUN HUGO_VERSION="0.139.0" && \
+    case "${TARGETARCH}" in \
+        arm64) HUGO_ARCH="arm64" ;; \
+        *) HUGO_ARCH="amd64" ;; \
+    esac && \
+    wget -qO- "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_linux-${HUGO_ARCH}.tar.gz" \
     | tar xz -C /usr/local/bin hugo
 
 # Set working directory
