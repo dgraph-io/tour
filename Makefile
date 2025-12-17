@@ -14,7 +14,7 @@ SHELL := /bin/bash
         test test-template-links test-tour-dql test-tour-graphql test-movie-dataset test-tour-links \
         docker-up docker-stop \
         seed-basic-facets seed-intro-dataset seed-movie-dataset \
-        deps-start deps-dev docker-dgraph-dir docker-dgraph-dir-clean dgraph-ready tour-ready hugo-start hugo-ready hugo-stop
+        deps-start deps-dev docker-dgraph-dir docker-dgraph-dir-clean dgraph-ready tour-ready hugo-ready
 
 # Configuration
 DGRAPH_ALPHA := http://localhost:8080
@@ -59,7 +59,7 @@ start: deps-start docker-dgraph-dir docker-up dgraph-ready tour-ready ## Start t
 
 stop: docker-stop ## Stop the tour
 
-reset: docker-stop hugo-stop docker-dgraph-dir-clean ## Reset Dgraph data
+reset: docker-stop docker-dgraph-dir-clean ## Reset Dgraph data
 
 # =============================================================================
 # Development (local Hugo with hot reload)
@@ -67,9 +67,9 @@ reset: docker-stop hugo-stop docker-dgraph-dir-clean ## Reset Dgraph data
 
 dev-setup: deps-dev docker-dgraph-dir ## Install dev dependencies
 
-dev-start: dev-setup docker-up dgraph-ready hugo-start ## Start Hugo dev server with hot reload
+dev-start: dev-setup docker-up dgraph-ready ## Start Hugo dev server with hot reload
 
-dev-stop: docker-stop hugo-stop ## Stop Hugo server and Docker containers
+dev-stop: docker-stop ## Stop Hugo server and Docker containers
 
 dev-restart: dev-stop dev-start ## Restart dev environment
 
@@ -212,6 +212,7 @@ docker-dgraph-dir:
 	@[[ -d docker/dgraph ]] || mkdir -p docker/dgraph
 
 docker-dgraph-dir-clean:
+	@echo "Cleaning dgraph docker data dir (docker/dgraph)"
 	@[[ -d docker/dgraph ]] && (rm -rf docker/dgraph 2>/dev/null || docker run --rm -v "$(PWD)/docker:/data" alpine rm -rf /data/dgraph) || true
 
 dgraph-ready:
@@ -233,18 +234,9 @@ tour-ready:
 		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for Hugo to be ready at http://localhost:$(HUGO_PORT)/"; exit 1; fi; \
 	done
 
-hugo-start:
-	hugo server -w --port $(HUGO_PORT) --baseURL=http://localhost:$(HUGO_PORT)/ - --config config.toml,releases.json
-
 hugo-ready:
 	@timeout=120; while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do \
 		sleep 1; \
 		timeout=$$((timeout - 1)); \
 		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for Hugo to be ready at http://localhost:$(HUGO_PORT)/"; exit 1; fi; \
 	done
-
-hugo-stop:
-	@if pgrep -x hugo > /dev/null; then \
-		echo "Stopping Hugo server..."; \
-		pkill -x hugo || true; \
-	fi
