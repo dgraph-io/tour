@@ -9,12 +9,12 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 .PHONY: help \
-        start stop reset \
+        start stop drop-all-data \
         dev-setup dev-start dev-stop dev-restart \
         test test-template-links test-tour-dql test-tour-graphql test-movie-dataset test-tour-links \
-        docker-up docker-down \
+        docker-up docker-down docker-rebuild \
         seed-basic-facets seed-intro-dataset seed-movie-dataset \
-        deps-start deps-dev docker-dgraph-dir docker-dgraph-dir-clean dgraph-ready hugo-ready
+        deps-start deps-dev dgraph-ready hugo-ready
 
 # Configuration (use ?= to allow environment variable override)
 DGRAPH_ALPHA ?= http://localhost:8080
@@ -50,26 +50,26 @@ help: ## Show this help message
 # Tour (Docker-based)
 # =============================================================================
 
-start: deps-start docker-dgraph-dir docker-up dgraph-ready hugo-ready ## Start the tour
+start: deps-start docker-up dgraph-ready hugo-ready ## Start the tour
 	@(command -v xdg-open &> /dev/null && xdg-open http://localhost:$(HUGO_PORT)/ 2>/dev/null) || \
 		(command -v open &> /dev/null && open http://localhost:$(HUGO_PORT)/ 2>/dev/null) || \
 		echo "To take the tour, open http://localhost:$(HUGO_PORT)/ in a browser"
 
 stop: docker-down ## Stop the tour
 
-reset: dgraph-ready ## Reset Dgraph data (drop all data and schema)
+drop-all-data: dgraph-ready ## Drop all data and schema from Dgraph
 	@echo "Dropping all data and schema from Dgraph..."
 	@response=$$(curl -s -X POST $(DGRAPH_ALPHA)/alter -d '{"drop_all": true}'); \
 	if ! echo "$$response" | jq -e '.data.code == "Success"' > /dev/null 2>&1; then \
 		echo "Failed to drop data: $$response"; exit 1; \
 	fi
-	@echo "Dgraph data reset complete."
+	@echo "Dgraph data dropped."
 
 # =============================================================================
 # Development (local Hugo with hot reload)
 # =============================================================================
 
-dev-setup: deps-dev docker-dgraph-dir ## Install dev dependencies
+dev-setup: deps-dev ## Install dev dependencies
 
 dev-start: dev-setup docker-up dgraph-ready hugo-ready ## Start Hugo dev server with hot reload
 
@@ -81,7 +81,7 @@ dev-restart: dev-stop dev-start ## Restart dev environment
 # Testing
 # =============================================================================
 
-test: reset deps-dev test-template-links test-tour-links test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset ## Run all tests
+test: drop-all-data deps-dev test-template-links test-tour-links test-tour-dql test-tour-graphql seed-movie-dataset test-movie-dataset ## Run all tests
 
 test-template-links:
 	@echo "Testing external link validity in templates..."
@@ -118,6 +118,10 @@ docker-down: ## Stop Docker containers
 	if docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
 		docker compose down; \
 	fi
+
+docker-rebuild: docker-down ## Rebuild and restart Docker containers
+	@[[ -f /.dockerenv ]] && exit 0; \
+	docker compose up -d --remove-orphans --build
 
 # =============================================================================
 # Data Seeding
@@ -227,13 +231,6 @@ deps-dev: deps-start
 		(command -v npm &> /dev/null) || $$SUDO apk add --no-cache npm; \
 		(command -v npx &> /dev/null) || { echo "Installing npx..." && $$SUDO npm install -g npx; }; \
 	fi
-
-docker-dgraph-dir:
-	@[[ -d docker/dgraph ]] || mkdir -p docker/dgraph
-
-docker-dgraph-dir-clean:
-	@echo "Cleaning dgraph docker data dir (docker/dgraph)"
-	@[[ -d docker/dgraph ]] && (rm -rf docker/dgraph 2>/dev/null || docker run --rm -v "$(PWD)/docker:/data" alpine rm -rf /data/dgraph) || true
 
 dgraph-ready: docker-up
 	@timeout=60; while ! curl -s $(DGRAPH_ALPHA)/health | grep -q '"status":"healthy"'; do \
