@@ -1,0 +1,65 @@
+"""
+GraphQL schema for the 1million movie dataset.
+Derived from the DQL schema at resources/1million.schema
+
+Note: The RDF data uses language-tagged strings (name@en, name@de, etc.)
+"""
+
+type Film {
+  id: ID!
+  name: String @search(by: [hash, term, trigram, fulltext]) @dgraph(pred: "name@.")
+  initial_release_date: DateTime @search(by: [year])
+  genre: [Genre] @dgraph(pred: "genre")
+  country: [Country] @dgraph(pred: "country")
+  rating: [Rating] @dgraph(pred: "rating")
+  rated: [ContentRating] @dgraph(pred: "rated")
+  tagline: String @dgraph(pred: "tagline@.")
+  starring: [Performance] @dgraph(pred: "starring")
+}
+
+type Director {
+  id: ID!
+  name: String @search(by: [hash, term, trigram, fulltext]) @dgraph(pred: "name@.")
+  films: [Film] @dgraph(pred: "director.film")
+}
+
+type Actor {
+  id: ID!
+  name: String @search(by: [hash, term, trigram, fulltext]) @dgraph(pred: "name@.")
+  films: [Performance] @dgraph(pred: "actor.film")
+}
+
+type Performance {
+  id: ID!
+  character_note: String @dgraph(pred: "performance.character_note@.")
+}
+
+type Genre {
+  id: ID!
+  name: String @search(by: [hash, term, trigram, fulltext]) @dgraph(pred: "name@.")
+  films: [Film] @dgraph(pred: "~genre")
+}
+
+type Country {
+  id: ID!
+  name: String @search(by: [hash, term, trigram, fulltext]) @dgraph(pred: "name@.")
+  films: [Film] @dgraph(pred: "~country")
+}
+
+type Rating {
+  id: ID!
+  name: String @search(by: [hash, term, trigram, fulltext]) @dgraph(pred: "name@.")
+  films: [Film] @dgraph(pred: "~rating")
+}
+
+type ContentRating {
+  id: ID!
+  name: String @search(by: [hash, term, trigram, fulltext]) @dgraph(pred: "name@.")
+  films: [Film] @dgraph(pred: "~rated")
+}
+
+type Location {
+  id: ID!
+  name: String @search(by: [hash, term, trigram, fulltext]) @dgraph(pred: "name@.")
+  loc: Point
+}

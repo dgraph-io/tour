@@ -1,8 +1,11 @@
-mutation {
-  addPerson(input: [{
-    xid: "manish"
-    name: "Manish"
-    ownsPets: [{ xid: "diggy" name: "Diggy" }]
-    friends: [{ xid: "alice" }]
-  }]) { numUids }
+query {
+  getPerson(xid: "alice" ){
+    name
+    friends {
+      name
+      friends {
+        name
+      }
+    }
+  }
 }

@@ -1,15 +1,88 @@
 # A Tour of Dgraph
 
-A step by step introductory tutorial of Dgraph. Built with [Hugo](https://gohugo.io/).
+A step by step introductory tutorial of Dgraph.
 
-Visit https://dgraph.io/tour for the running instance.
+## Taking the Tour
 
-**Use [Discuss Issues](https://discuss.dgraph.io/tags/c/issues/35/tutorial) for reporting issues about this repository.**
+### Prerequisites
 
-## Developing
+- [Docker](https://docs.docker.com/get-docker/)
 
-The tutorial can be run locally by cloning this repo and running `scripts/local.sh`.
-The tour has been tested with hugo `v0.37`.
+### macOS / Linux
+
+```bash
+git clone https://github.com/dgraph-io/tour.git
+cd tour
+make start
+```
+
+The tour will automatically open in your browser.
+
+### Windows
+
+```powershell
+git clone https://github.com/dgraph-io/tour.git
+cd tour
+docker compose up -d
+```
+
+Then open http://localhost:1313/ in your browser.
+
+### Stopping the Tour
+
+**macOS / Linux:**
+```bash
+make stop
+```
+
+**Windows:**
+```powershell
+docker compose down
+```
+
+## Local Services
+
+When running the tour, the following services are available:
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| Hugo Tour | http://localhost:1313/ | The tutorial site |
+| Dgraph Alpha | http://localhost:8080/ | GraphQL and DQL endpoints |
+| Ratel UI | http://localhost:8000/ | Dgraph query interface |
+
+## Development
+
+### Prerequisites
+
+- `make` (pre-installed on macOS and most Linux distributions)
+- Docker
+
+### Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `make start` | Start the tour |
+| `make stop` | Stop the tour |
+| `make reset` | Reset Dgraph data and reload sample dataset |
+| `make test` | Run all tests |
+
+Run `make help` to see all available commands.
+
+### Testing
+
+The test suite validates all tour examples work correctly:
+
+```bash
+make test
+```
+
+This runs:
+- Link validation for templates and live tour
+- DQL query tests (42 tests)
+- GraphQL query tests (33 tests)
+- Movie dataset relationship tests
+
+### Legacy Development
 
 To develop and test version redirects locally run the build script:
 `TOUR_BASE_URL=http://localhost:8000 python3 scripts/build.py`
@@ -22,7 +95,7 @@ Structure of the tour releases/version switcher must mirror the structure of the
 
 ### Where to make changes
 
-- All changes/updates reflecting the changes in Dgraph master should be committed into the `master` branch of this repository (`dgraph-io/tutorial`).
+- All changes/updates reflecting the changes in Dgraph master should be committed into the `master` branch of this repository (`dgraph-io/tour`).
 - Fixes and changes for older versions of the tour should be committed into relevant `dgraph-$version` branch.
 - As part of the release process for Dgraph a new branch `dgraph-$version` must be cut here (`git checkout master; git checkout -b dgraph-<NEW_SEMVER>`).
 

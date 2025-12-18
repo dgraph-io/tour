@@ -1,9 +1,0 @@
-{
-  everyone(func: anyofterms(name, "Michael Catalina")) {
-    name
-    friend {
-      name
-      friend { expand(_all_) { expand(_all_) } }
-    }
-  }
-}

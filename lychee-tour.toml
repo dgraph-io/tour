@@ -1,0 +1,19 @@
+# Lychee link checker configuration for running tour instance
+# https://lychee.cli.rs/
+
+# Skip file:// URLs only
+exclude = [
+    "^file://",
+]
+
+# Accept 429 (rate limiting) and 504 (gateway timeout) as valid
+accept = ["100..=399", "429", "504"]
+
+# Timeout for requests
+timeout = 30
+
+# Number of retries
+max_retries = 3
+
+# User agent
+user_agent = "lychee/0.14"

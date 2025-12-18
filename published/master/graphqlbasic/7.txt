@@ -1,7 +1,0 @@
-{
-  queryPerson(order: { asc: name }) {
-    id
-    name
-    age
-  }
-}

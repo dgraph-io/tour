@@ -1,9 +1,0 @@
-{
-  michael_friends_first(func: allofterms(name@., "Michael")) {
-    name
-    age
-    friend (orderasc: name@., offset: 1, first: 2) {
-      name@.
-    }
-  }
-}

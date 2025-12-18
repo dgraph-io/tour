@@ -1,5 +1,0 @@
-{
-  company(func: allofterms(name, "CompanyABC")) {
-    _predicate_
-  }
-}

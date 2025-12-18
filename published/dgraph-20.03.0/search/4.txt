@@ -1,7 +1,0 @@
-{
-  alpha(func: has(starring), orderasc: name@en)
-    @filter(ge(name@en, "You") AND le(name@en, "Zoo"))
-  {
-    name@en
-  }
-}

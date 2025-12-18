@@ -1,4 +1,0 @@
-director.film: uid @reverse .
-genre: uid @reverse .
-initial_release_date: dateTime @index(year) .
-name: string @index(term) @lang .

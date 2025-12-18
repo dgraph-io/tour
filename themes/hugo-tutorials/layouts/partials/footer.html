@@ -1,3 +1,11 @@
+<script>
+  window.dgraphConfig = {
+    localEndpoint: "{{ .Site.Params.url.localEndpoint }}",
+    graphqlEndpoint: "{{ .Site.Params.url.graphqlEndpoint }}",
+    dgraphPlay: "{{ .Site.Params.url.dgraphPlay }}",
+    playGraphQL: "{{ .Site.Params.url.dgraphPlayGraphQL }}"
+  };
+</script>
 <script src='{{ relURL "/js/build/dgraph-tour.js" }}?{{ now.Format "2006-01-02T150405" }}'></script>
 <script src='{{ relURL "/js/basic.js" }}?{{ md5 (readFile "themes/hugo-tutorials/static/js/basic.js") }}'></script>
 <script src="//unpkg.com/@dgraph-io/community"></script>

@@ -1,18 +1,21 @@
-# TODO: Change this to the new TYPE System.
 {
   delete {
-    # Delete a single triple.
+    # Delete a single triple (S P O).
+    # You must know the exact value to delete.
     <0x1c3eb> <name> "Steven" .
     <0x1c3eb> <age> "38" .
-    # Note: You need to know the value/Object to use "S P O". Otherwise use "S P *".
 
-    # Delete an edge for a given node "S P O".
-    <0x1c3eb> <friend> <1x1c2a1> .
+    # Delete an edge between two nodes (S P O).
+    <0x1c3eb> <friend> <0x1c2a1> .
 
-    # Delete all triples for a given edge "S P *".
+    # Delete all values for a predicate (S P *).
+    # Removes all friends from this node.
     <0x1c3eb> <friend> * .
 
-    # Delete all triples for a given node "S * *".
+    # Delete all predicates for a node (S * *).
+    # IMPORTANT: Only deletes predicates defined in the node's
+    # dgraph.type. Ensure the node has a type set and that the
+    # type is defined in your schema.
     <0x1c3eb> * * .
   }
 }

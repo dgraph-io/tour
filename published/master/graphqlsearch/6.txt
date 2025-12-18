@@ -1,9 +1,0 @@
-{
-  queryLine(filter: {line: {alloftext: "and like"}}) {
-    id
-    line
-    by {
-      name
-    }
-  }
-}

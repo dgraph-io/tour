@@ -1,0 +1,52 @@
+services:
+  dgraph:
+    image: dgraph/standalone:latest
+    container_name: tour-dgraph
+    ports:
+      - "8080:8080"
+      - "9080:9080"
+    volumes:
+      - ./docker/dgraph:/dgraph
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  ratel:
+    image: dgraph/ratel:latest
+    container_name: tour-ratel
+    ports:
+      - "8000:8000"
+    depends_on:
+      - dgraph
+
+  tour:
+    build:
+      context: .
+      target: tour-hugo
+    container_name: tour-hugo
+    ports:
+      - "1313:1313"
+    volumes:
+      - ./content:/app/content:ro
+      - ./themes:/app/themes:ro
+      - ./config.toml:/app/config.toml:ro
+    environment:
+      - DGRAPH_ALPHA=http://tour-dgraph:8080
+      - HUGO_PORT=1313
+    depends_on:
+      dgraph:
+        condition: service_healthy
+
+  tour-seed:
+    build:
+      context: .
+      target: tour-seed
+    container_name: tour-seed
+    environment:
+      - DGRAPH_ALPHA=http://tour-dgraph:8080
+    depends_on:
+      dgraph:
+        condition: service_healthy

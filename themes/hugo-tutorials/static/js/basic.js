@@ -13,6 +13,15 @@ function updateFields() {
 }
 
 $(document).ready(function () {
+  // Initialize graphqlendpoint with default if not set (lowercase to match runnable.js)
+  if (!sessionStorage.getItem("graphqlendpoint")) {
+    const defaultEndpoint = (window.dgraphConfig && window.dgraphConfig.graphqlEndpoint) || "http://localhost:8080/graphql";
+    sessionStorage.setItem("graphqlendpoint", defaultEndpoint);
+  }
+  // Set dummy apikey for local development (runnable.js requires it for push schema)
+  if (!sessionStorage.getItem("apikey")) {
+    sessionStorage.setItem("apikey", "local-dev");
+  }
   updateFields();
   $(".lesson-tiles__link .status").each(function () {
     const status = localStorage.getItem(`${$(this).data("course")}.Status`);
@@ -49,9 +58,97 @@ $(document).on(
   ".runnable-url-modal button[data-action=apply-endpoint]",
   function (e) {
     sessionStorage.setItem("graphqlendpoint", $("#inputGraphQLEndpoint").val());
-    sessionStorage.setItem("apikey", $("#inputAPIKey").val());
     $(".runnable-url-modal.modal").removeClass("show");
     updateFields();
+  }
+);
+
+// Override run-graphql to use fetch() for local development
+$(document).on(
+  "click",
+  '.runnable [data-action="run-graphql"]',
+  async function (e) {
+    e.preventDefault();
+    e.stopImmediatePropagation(); // Prevent runnable.js handler
+
+    var $currentRunnable = $(this).closest(".runnable");
+    var query = $currentRunnable.attr("data-current");
+    var endpoint = sessionStorage.getItem("graphqlendpoint");
+
+    if (!endpoint) {
+      $(".runnable-url-modal.modal").addClass("show");
+      return null;
+    }
+
+    var responseEl = $currentRunnable.find(".output");
+    $currentRunnable.find(".output-container").removeClass("empty error");
+    responseEl.text("Waiting for the server response...");
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query })
+      });
+
+      const data = await response.json();
+      if (data.errors) {
+        $currentRunnable.find(".output-container").addClass("error");
+      }
+      if (data.extensions) delete data.extensions;
+      responseEl.html("<pre>" + JSON.stringify(data, null, 2) + "</pre>");
+    } catch (err) {
+      $currentRunnable.find(".output-container").addClass("error");
+      responseEl.text("Error: " + err.message);
+    }
+  }
+);
+
+// Override push schema to use fetch() for local development
+$(document).on(
+  "click",
+  '.runnable [data-action="push schema"]',
+  async function (e) {
+    e.preventDefault();
+    e.stopImmediatePropagation(); // Prevent runnable.js handler
+
+    var schema = $(this).closest(".runnable").attr("data-current");
+    var endpoint = sessionStorage.getItem("graphqlendpoint");
+
+    if (!endpoint) {
+      $(".runnable-url-modal.modal").addClass("show");
+      return null;
+    }
+
+    $(".runnable-response-modal.modal .container-fluid").text("Pushing schema...");
+    $(".runnable-response-modal.modal").addClass("show");
+
+    try {
+      // Extract base URL from endpoint (remove /graphql path)
+      const baseUrl = endpoint.replace(/\/graphql$/, '');
+      const adminUrl = baseUrl + "/admin/schema";
+
+      const response = await fetch(adminUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/graphql" },
+        body: schema
+      });
+
+      const result = await response.text();
+      if (response.ok) {
+        $(".runnable-response-modal.modal .container-fluid").html(
+          "<strong>Schema pushed successfully!</strong><pre>" + result + "</pre>"
+        );
+      } else {
+        $(".runnable-response-modal.modal .container-fluid").html(
+          "<strong>Error:</strong><pre>" + result + "</pre>"
+        );
+      }
+    } catch (err) {
+      $(".runnable-response-modal.modal .container-fluid").html(
+        "<strong>Error:</strong><pre>" + err.message + "</pre>"
+      );
+    }
   }
 );
 
@@ -103,7 +200,7 @@ $(document).ready(function () {
   };
   request.send();
   $("iframe.ratel.query").each(function () {
-    let url = "https://play.dgraph.io/?latest";
+    let url = (window.dgraphConfig?.dgraphPlay || "https://play.dgraph.io") + "/?latest";
     const address = localStorage.getItem("tourDgraphAddr");
     const slashApiKey = localStorage.getItem("slashAPIKey");
     const query = $(this).data("code");
@@ -118,7 +215,7 @@ $(document).ready(function () {
     $(this).attr("src", url);
   });
   $("iframe.ratel.mutate").each(function () {
-    let url = "https://play.dgraph.io/?latest";
+    let url = (window.dgraphConfig?.dgraphPlay || "https://play.dgraph.io") + "/?latest";
     const address = localStorage.getItem("tourDgraphAddr");
     const slashApiKey = localStorage.getItem("slashAPIKey");
     if (address || slashApiKey) {

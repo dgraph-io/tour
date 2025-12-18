@@ -8,7 +8,7 @@
 
       <div class="server-switch">
         <span>Dgraph:</span>
-        <span class="url">http://localhost:8080</span>
+        <span class="url">{{ .Content.Site.Params.url.localEndpoint }}</span>
         <a class="btn-change" href="#">
             <i class="far fa-edit"></i>
         </a>
@@ -80,10 +80,7 @@
           <form>
             <div class="form-group">
               <label for="inputDgraphUrl">Dgraph Alpha Address</label>
-              <input type="text" class="form-control" id="inputDgraphUrl" placeholder="http://localhost:8080" style="padding:0 4px;">
-              <!-- <small id="serverStatus" class="form-text text-muted">Server status goes hear.</small> -->
-              <label for="inputSlashKey">Dgraph Cloud API Key</label>
-              <input type="password" class="form-control" id="inputSlashKey" placeholder="" style="padding:0 4px;">
+              <input type="text" class="form-control" id="inputDgraphUrl" placeholder="{{ .Content.Site.Params.url.localEndpoint }}" style="padding:0 4px;">
             </div>
           </form>
         </div>

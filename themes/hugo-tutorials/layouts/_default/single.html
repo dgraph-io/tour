@@ -34,7 +34,7 @@
                 {{ else }}
                     {{ if eq .Params.iFrameRatel 1 }}
                         <div class="lesson__code modal-bakdrop block">
-                            <iframe class='ratel {{ if eq .Params.endpoint "/mutate" }}mutate{{ else }}query{{ end }}' {{ if ne .Params.endpoint "/mutate"}}data-code='{{ $codeContent }}'{{ end }} src="https://play.dgraph.io/?latest" style="width: 100%; height: 100%;" ></iframe>
+                            <iframe class='ratel {{ if eq .Params.endpoint "/mutate" }}mutate{{ else }}query{{ end }}' {{ if ne .Params.endpoint "/mutate"}}data-code='{{ $codeContent }}'{{ end }} src="{{ .Site.Params.url.dgraphPlay }}/?latest" style="width: 100%; height: 100%;" ></iframe>
                         </div>
                     {{ else if eq .Params.type "graphql/schema" }}
                         <div class="lesson__code modal-bakdrop block">

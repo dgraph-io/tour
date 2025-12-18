@@ -1,7 +1,0 @@
-{
-  set {
-    ...michael... <boss_of> ...someone... .
-    
-    ...sarah... <works_for> ...company... .
-  }
-}

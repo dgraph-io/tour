@@ -486,6 +486,10 @@
   width: unset;
 }
 
+.lesson__code {
+  overflow: auto;
+}
+
 .tour-container-new .page-intro {
   border-bottom: none;
   padding: 120px 0 0;

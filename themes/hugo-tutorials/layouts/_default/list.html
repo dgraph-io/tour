@@ -16,23 +16,23 @@
 
   <section class="page-body pt-0">
     <div class="section--large lesson-tiles-container" style="margin-bottom: 0px !important">
-      <div class="container" data-context="graphql">
+      <div class="container" data-context="dql">
         <h2 class="main-title">Which Language Suits You?</h2>
 
         <div class="lesson-tiles-switcher">
-          <div data-context="graphql">
-            <p style="font-weight: normal">GraphQL</p>
-            <span>Dgraph's Generated API</span>
-          </div>
           <div data-context="dql">
             <p style="font-weight: normal">DQL</p>
             <span>Dgraph's Query Language</span>
+          </div>
+          <div data-context="graphql">
+            <p style="font-weight: normal">GraphQL</p>
+            <span>Dgraph's Generated API</span>
           </div>
         </div>
       </div>
     </div>
     <div class="section--large lesson-tiles-container tiles-container">
-      <div class="container container-narrow" data-context="graphql">
+      <div class="container container-narrow" data-context="dql">
         <div class="lesson-tiles" style="all: unset !important">
           {{ $counter := 1 }} {{ range .Site.Menus.main }}
           <div class="tile" data-context='{{ if in .Identifier "graphql" }}graphql{{ else }}dql{{ end }}'>

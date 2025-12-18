@@ -1,6 +1,0 @@
-{
-# The answer will have each director's most recent movie
-# and be sorted over all by the release dates of those movies.
-#
-# Return directors name, movie name and release date.
-}

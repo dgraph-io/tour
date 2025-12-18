@@ -1,0 +1,40 @@
+{
+  set {
+
+    # -- Facets on scalar predicates
+    _:alice <name> "Alice" .
+    _:alice <mobile> "040123456" (since=2006-01-02T15:04:05) .
+    _:alice <car> "MA0123" (since=2006-02-02T13:01:09, first=true) .
+
+    _:bob <name> "Bob" .
+    _:bob <car> "MA0134" (since=2006-02-02T13:01:09) .
+
+    _:charlie <name> "Charlie" .
+    _:dave <name> "Dave" .
+
+
+    # -- Facets on UID predicates
+    _:alice <friend> _:bob (close=true, relative=false) .
+    _:alice <friend> _:charlie (close=false, relative=true) .
+    _:alice <friend> _:dave (close=true, relative=true) .
+
+
+    # -- Facets for variable propagation
+    _:movie1 <name> "Movie 1" .
+    _:movie2 <name> "Movie 2" .
+    _:movie3 <name> "Movie 3" .
+
+    _:alice <rated> _:movie1 (rating=3) .
+    _:alice <rated> _:movie2 (rating=2) .
+    _:alice <rated> _:movie3 (rating=5) .
+
+    _:bob <rated> _:movie1 (rating=5) .
+    _:bob <rated> _:movie2 (rating=5) .
+    _:bob <rated> _:movie3 (rating=5) .
+
+    _:charlie <rated> _:movie1 (rating=2) .
+    _:charlie <rated> _:movie2 (rating=5) .
+    _:charlie <rated> _:movie3 (rating=1) .
+
+  }
+}

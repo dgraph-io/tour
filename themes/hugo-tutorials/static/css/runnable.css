@@ -73,6 +73,7 @@
 }
 .runnable .output {
   overflow-y: auto;
+  overflow-x: auto;
   background: #fffff3;
   min-height: 100%;
 }

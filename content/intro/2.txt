@@ -1,0 +1,19 @@
+# Define Types
+
+type Person {
+    name
+    age
+    friend
+    owns_pet
+}
+
+type Animal {
+    name
+}
+
+# Define Directives and index
+
+name: string @index(term) @lang .
+age: int @index(int) .
+friend: [uid] @count .
+owns_pet: [uid] .
