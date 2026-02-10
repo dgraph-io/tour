@@ -19,6 +19,7 @@ SHELL := /bin/bash
 # Configuration (use ?= to allow environment variable override)
 DGRAPH_ALPHA ?= http://localhost:8080
 HUGO_PORT ?= 1313
+INSTALL_MISSING ?=
 
 # Use local lychee if available, otherwise use Docker
 LYCHEE_LOCAL := $(shell command -v lychee 2>/dev/null)
@@ -202,6 +203,13 @@ seed-movie-dataset: stage-movies-dataset ## Load the movies dataset into Dgraph
 # =============================================================================
 
 deps-start:
+	@if ! command -v docker &> /dev/null && [[ -z "$(INSTALL_MISSING)" ]]; then \
+		echo "Error: docker is not installed."; \
+		echo ""; \
+		echo "Install it manually, or re-run with INSTALL_MISSING=1:"; \
+		echo "  make $(MAKECMDGOALS) INSTALL_MISSING=1"; \
+		exit 1; \
+	fi
 	@if [[ "$$(uname)" == "Darwin" ]]; then \
 		if ! command -v docker &> /dev/null; then \
 			(command -v brew &> /dev/null) || { echo "Installing Homebrew..." && /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; }; \
@@ -215,6 +223,20 @@ deps-start:
 	fi
 
 deps-dev: deps-start
+	@missing=""; \
+	command -v hugo &> /dev/null || missing="$$missing hugo"; \
+	command -v jq &> /dev/null || missing="$$missing jq"; \
+	command -v node &> /dev/null || missing="$$missing node"; \
+	command -v npm &> /dev/null || missing="$$missing npm"; \
+	command -v npx &> /dev/null || missing="$$missing npx"; \
+	command -v lychee &> /dev/null || echo "Note: lychee not found, falling back to Docker image"; \
+	if [[ -n "$$missing" && -z "$(INSTALL_MISSING)" ]]; then \
+		echo "Error: missing required dependencies:$$missing"; \
+		echo ""; \
+		echo "Install them manually, or re-run with INSTALL_MISSING=1:"; \
+		echo "  make $(MAKECMDGOALS) INSTALL_MISSING=1"; \
+		exit 1; \
+	fi
 	@if [[ "$$(uname)" == "Darwin" ]]; then \
 		(command -v brew &> /dev/null) || { echo "Installing Homebrew..." && /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; }; \
 		(command -v hugo &> /dev/null) || { echo "Installing hugo..." && brew install hugo; }; \
