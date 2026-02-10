@@ -110,7 +110,6 @@ EOF
 case "${1:-server}" in
     server)
         wait_for_dgraph
-        seed_intro_dataset
         start_hugo
         ;;
     seed)
