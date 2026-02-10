@@ -9,7 +9,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 .PHONY: help \
-        start stop clean drop-all-data \
+        start stop restart clean drop-all-data \
         dev-setup dev-start dev-stop dev-restart \
         test test-template-links test-tour-dql test-tour-graphql test-movie-dataset test-tour-links \
         docker-up docker-up-dgraph docker-down docker-rebuild \
@@ -57,6 +57,8 @@ start: deps-start dgraph-ready tour-ready ## Start the tour
 		echo "To take the tour, open http://localhost:$(HUGO_PORT)/ in a browser"
 
 stop: docker-down ## Stop the tour
+
+restart: drop-all-data docker-up tour-ready ## Drop all data and restart the tour
 
 clean: drop-all-data docker-down ## Drop all data, stop containers, and remove tour images
 	@docker rm -f tour-hugo tour-seed 2>/dev/null || true
