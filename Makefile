@@ -13,7 +13,7 @@ SHELL := /bin/bash
         dev-setup dev-start dev-stop dev-restart \
         test test-template-links test-tour-dql test-tour-graphql test-movie-dataset test-tour-links \
         docker-up docker-down docker-rebuild \
-        seed-basic-facets seed-intro-dataset seed-movie-dataset \
+        seed-basic-facets seed-intro-dataset seed-movie-dataset stage-movies-dataset \
         deps-start deps-dev dgraph-ready hugo-ready
 
 # Configuration (use ?= to allow environment variable override)
@@ -175,18 +175,24 @@ seed-intro-dataset: dgraph-ready ## Load the tour sample dataset (DQL + GraphQL)
 	fi
 	@echo "Tour dataset loaded."
 
-seed-movie-dataset: dgraph-ready ## Load the movies dataset into Dgraph
+stage-movies-dataset: dgraph-ready ## Copy movie dataset files into the Dgraph container
+	# When running inside a Docker container (/.dockerenv exists), resources/ is
+	# already on the local filesystem — no staging needed. This check allows the
+	# same Makefile to work both on the host and inside the tour-seed container.
+	@[[ -f /.dockerenv ]] && exit 0; \
+	docker cp resources/1million.rdf.gz tour-dgraph:/tmp/1million.rdf.gz; \
+	docker cp resources/1million.schema tour-dgraph:/tmp/1million.schema
+
+seed-movie-dataset: stage-movies-dataset ## Load the movies dataset into Dgraph
 	@count=$$(curl -s -H "Content-Type: application/json" "$(DGRAPH_ALPHA)/query" -d '{"query": "{ count(func: has(genre), first: 1) { count(uid) } }"}' | grep -o '"count":[0-9]\+' | tail -1 | grep -o '[0-9]\+' || echo "0"); \
 	if [[ "$$count" == "0" || -z "$$count" ]]; then \
 		echo "Loading movies schema and data..."; \
 		if [[ -f /.dockerenv ]]; then \
+			: "Inside container: dgraph and resources/ are local, load via gRPC"; \
 			dgraph live -f resources/1million.rdf.gz -s resources/1million.schema --alpha tour-dgraph:9080; \
 		else \
-			[[ -s docker/dgraph/1million.rdf.gz ]] || cp resources/1million.rdf.gz docker/dgraph/; \
-			[[ -s docker/dgraph/1million.schema ]] || cp resources/1million.schema docker/dgraph/; \
-			docker exec tour-dgraph dgraph live -f 1million.rdf.gz -s 1million.schema; \
-			[[ -s docker/dgraph/1million.rdf.gz ]] && rm docker/dgraph/1million.rdf.gz || true; \
-			[[ -s docker/dgraph/1million.schema ]] && rm docker/dgraph/1million.schema || true; \
+			: "On host: files copied into container by stage-movies-dataset target"; \
+			docker exec tour-dgraph dgraph live -f /tmp/1million.rdf.gz -s /tmp/1million.schema; \
 		fi; \
 		echo "Done"; \
 	fi
