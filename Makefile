@@ -12,9 +12,9 @@ SHELL := /bin/bash
         start stop clean drop-all-data \
         dev-setup dev-start dev-stop dev-restart \
         test test-template-links test-tour-dql test-tour-graphql test-movie-dataset test-tour-links \
-        docker-up docker-down docker-rebuild \
+        docker-up docker-up-dgraph docker-down docker-rebuild \
         seed-basic-facets seed-intro-dataset seed-movie-dataset stage-movies-dataset \
-        deps-start deps-dev dgraph-ready hugo-ready
+        deps-start deps-dev dgraph-ready tour-ready
 
 # Configuration (use ?= to allow environment variable override)
 DGRAPH_ALPHA ?= http://localhost:8080
@@ -51,14 +51,16 @@ help: ## Show this help message
 # Tour (Docker-based)
 # =============================================================================
 
-start: deps-start docker-up dgraph-ready hugo-ready ## Start the tour
+start: deps-start dgraph-ready tour-ready ## Start the tour
 	@(command -v xdg-open &> /dev/null && xdg-open http://localhost:$(HUGO_PORT)/ 2>/dev/null) || \
 		(command -v open &> /dev/null && open http://localhost:$(HUGO_PORT)/ 2>/dev/null) || \
 		echo "To take the tour, open http://localhost:$(HUGO_PORT)/ in a browser"
 
 stop: docker-down ## Stop the tour
 
-clean: drop-all-data docker-down ## Drop all data and stop Docker containers
+clean: drop-all-data docker-down ## Drop all data, stop containers, and remove tour images
+	@docker rm -f tour-hugo tour-seed 2>/dev/null || true
+	@docker rmi -f tour-tour tour-tour-seed 2>/dev/null || true
 
 drop-all-data: dgraph-ready ## Drop all data and schema from Dgraph
 	@echo "Dropping all data and schema from Dgraph..."
@@ -74,7 +76,7 @@ drop-all-data: dgraph-ready ## Drop all data and schema from Dgraph
 
 dev-setup: deps-dev ## Install dev dependencies
 
-dev-start: dev-setup docker-up dgraph-ready hugo-ready ## Start Hugo dev server with hot reload
+dev-start: dev-setup dgraph-ready tour-ready ## Start Hugo dev server with hot reload
 
 dev-stop: docker-down ## Stop Hugo server and Docker containers
 
@@ -102,7 +104,7 @@ test-movie-dataset: dgraph-ready
 	@echo "Testing movies dataset..."
 	@./tests/test_movies_dataset.sh
 
-test-tour-links: hugo-ready
+test-tour-links: tour-ready
 	@echo "Testing link validity in running tour at http://localhost:$(HUGO_PORT)/..."
 	@$(LYCHEE) --no-progress --config $(LYCHEE_TOUR_CONFIG) "http://localhost:$(HUGO_PORT)/"
 
@@ -112,8 +114,12 @@ test-tour-links: hugo-ready
 
 docker-up: ## Start Docker containers
 	@[[ -f /.dockerenv ]] && exit 0; \
-	if ! docker compose ps --status running 2>/dev/null | grep -q tour-; then \
-		docker compose up -d; \
+	docker compose up -d
+
+docker-up-dgraph: ## Start only Dgraph and Ratel containers
+	@[[ -f /.dockerenv ]] && exit 0; \
+	if ! docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
+		docker compose up -d dgraph ratel; \
 	fi
 
 docker-down: ## Stop Docker containers
@@ -262,7 +268,7 @@ deps-dev: deps-start
 		(command -v npx &> /dev/null) || { echo "Installing npx..." && $$SUDO npm install -g npx; }; \
 	fi
 
-dgraph-ready: docker-up
+dgraph-ready: docker-up-dgraph
 	@timeout=60; while ! curl -s $(DGRAPH_ALPHA)/health | grep -q '"status":"healthy"'; do \
 		sleep 1; \
 		timeout=$$((timeout - 1)); \
@@ -274,7 +280,7 @@ dgraph-ready: docker-up
 		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for admin endpoint to report healthy status (POST $(DGRAPH_ALPHA)/admin)"; exit 1; fi; \
 	done
 
-hugo-ready: docker-up
+tour-ready: docker-up dgraph-ready
 	@timeout=60; while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do \
 		sleep 1; \
 		timeout=$$((timeout - 1)); \
