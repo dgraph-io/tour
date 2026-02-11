@@ -1,6 +1,6 @@
 # A Tour of Dgraph
 
-A step by step introductory tutorial of Dgraph.
+A step-by-step introductory tutorial for [Dgraph](https://dgraph.io), the distributed graph database.
 
 ## Taking the Tour
 
@@ -16,7 +16,7 @@ cd tour
 make start
 ```
 
-The tour will automatically open in your browser.
+The tour opens automatically in your default browser.
 
 ### Windows
 
@@ -42,11 +42,9 @@ docker compose down
 
 ## Local Services
 
-When running the tour, the following services are available:
-
 | Service | URL | Description |
 |---------|-----|-------------|
-| Hugo Tour | http://localhost:1313/ | The tutorial site |
+| Tour site | http://localhost:1313/ | The tutorial |
 | Dgraph Alpha | http://localhost:8080/ | GraphQL and DQL endpoints |
 | Ratel UI | http://localhost:8000/ | Dgraph query interface |
 
@@ -54,70 +52,71 @@ When running the tour, the following services are available:
 
 ### Prerequisites
 
+- [Docker](https://docs.docker.com/get-docker/)
 - `make` (pre-installed on macOS and most Linux distributions)
-- Docker
 
 ### Available Commands
 
 | Command | Description |
 |---------|-------------|
-| `make start` | Start the tour |
+| `make start` | Start the tour (Dgraph + Hugo + sample data) |
 | `make stop` | Stop the tour |
-| `make reset` | Reset Dgraph data and reload sample dataset |
-| `make test` | Run all tests |
+| `make restart` | Drop all data and restart the tour |
+| `make clean` | Drop all data, stop containers, and remove images |
+| `make test` | Run all tests (DQL + GraphQL + dataset) |
+| `make seed-basic-facets` | Load facet sample data for the facets lesson |
+| `make dev-setup` | Install dev dependencies (Hugo, linters) |
+| `make dev-start` | Start Hugo dev server with hot reload |
+| `make dev-stop` | Stop Hugo server and Docker containers |
+| `make dev-restart` | Restart dev environment |
 
-Run `make help` to see all available commands.
+Run `make help` for the full list of targets.
 
 ### Testing
-
-The test suite validates all tour examples work correctly:
 
 ```bash
 make test
 ```
 
-This runs:
-- Link validation for templates and live tour
+The test suite runs:
 - DQL query tests (42 tests)
 - GraphQL query tests (33 tests)
-- Movie dataset relationship tests
+- Movie dataset relationship tests (5 tests)
 
-### Legacy Development
+### Building for Production
 
-To develop and test version redirects locally run the build script:
-`TOUR_BASE_URL=http://localhost:8000 python3 scripts/build.py`
+To build all versioned branches locally:
 
-This will recompile `master` and all `dgraph-<version>` branches and store the static site content in the `published/` folder
+```bash
+TOUR_BASE_URL=http://localhost:8000 python3 scripts/build.py
+```
 
-## Dgraph Release Process
+This compiles `master` and every `dgraph-<version>` branch into the `published/` folder.
 
-Structure of the tour releases/version switcher must mirror the structure of the Dgraph Docs releases/versions. (Starting from Dgraph 1.0.16 onwards).
+## Release Process
 
-### Where to make changes
+The tour's version switcher mirrors Dgraph Docs releases.
 
-- All changes/updates reflecting the changes in Dgraph master should be committed into the `master` branch of this repository (`dgraph-io/tour`).
-- Fixes and changes for older versions of the tour should be committed into relevant `dgraph-$version` branch.
-- As part of the release process for Dgraph a new branch `dgraph-$version` must be cut here (`git checkout master; git checkout -b dgraph-<NEW_SEMVER>`).
+- Commit changes for the latest Dgraph release to the `master` branch.
+- Commit fixes for older versions to the relevant `dgraph-<version>` branch.
+- When Dgraph releases a new version, cut a branch: `git checkout master && git checkout -b dgraph-<NEW_SEMVER>`.
 
 ## Deploying to Live Site
 
 Run the build script:
-`python3 scripts/build.py`
 
-Once it finishes without errors it will commit all static content
-into the `published/` folder.
+```bash
+python3 scripts/build.py
+```
 
-After that you can `git push` and the server will pick up the changes.
+The script commits all static content to the `published/` folder. Push the result and the server picks up changes within two minutes via cron.
 
-## Server config
+## Server Configuration
 
-File `nginx/tour.conf` is symlinked to Nginx's `sites-available`
-when you edit it you must ssh and run `nginx -s reload`.
+`nginx/tour.conf` is symlinked into Nginx's `sites-available`. After editing, SSH in and run `nginx -s reload`.
 
-Cron task
+Cron job (pulls every 2 minutes):
 
 ```sh
 */2 *    *   *   *   cd /home/ubuntu/dgraph-tour && git pull
 ```
-
-Pulls new commits from git.
