@@ -83,40 +83,6 @@ The test suite runs:
 - GraphQL query tests (33 tests)
 - Movie dataset relationship tests (5 tests)
 
-### Building for Production
+## Running the Tour
 
-To build all versioned branches locally:
-
-```bash
-TOUR_BASE_URL=http://localhost:8000 python3 scripts/build.py
-```
-
-This compiles `master` and every `dgraph-<version>` branch into the `published/` folder.
-
-## Release Process
-
-The tour's version switcher mirrors Dgraph Docs releases.
-
-- Commit changes for the latest Dgraph release to the `master` branch.
-- Commit fixes for older versions to the relevant `dgraph-<version>` branch.
-- When Dgraph releases a new version, cut a branch: `git checkout master && git checkout -b dgraph-<NEW_SEMVER>`.
-
-## Deploying to Live Site
-
-Run the build script:
-
-```bash
-python3 scripts/build.py
-```
-
-The script commits all static content to the `published/` folder. Push the result and the server picks up changes within two minutes via cron.
-
-## Server Configuration
-
-`nginx/tour.conf` is symlinked into Nginx's `sites-available`. After editing, SSH in and run `nginx -s reload`.
-
-Cron job (pulls every 2 minutes):
-
-```sh
-*/2 *    *   *   *   cd /home/ubuntu/dgraph-tour && git pull
-```
+The tour is no longer hosted as a live site. Clone the repository and run it locally with `make start` or `docker compose up -d` as described above.
