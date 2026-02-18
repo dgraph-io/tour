@@ -9,16 +9,17 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 .PHONY: help \
-        start stop drop-all-data \
+        start stop restart clean drop-all-data \
         dev-setup dev-start dev-stop dev-restart \
         test test-template-links test-tour-dql test-tour-graphql test-movie-dataset test-tour-links \
-        docker-up docker-down docker-rebuild \
-        seed-basic-facets seed-intro-dataset seed-movie-dataset \
-        deps-start deps-dev dgraph-ready hugo-ready
+        docker-up docker-up-dgraph docker-down docker-rebuild \
+        seed-basic-facets seed-intro-dataset seed-movie-dataset stage-movies-dataset \
+        deps-start deps-dev dgraph-ready tour-ready
 
 # Configuration (use ?= to allow environment variable override)
 DGRAPH_ALPHA ?= http://localhost:8080
 HUGO_PORT ?= 1313
+INSTALL_MISSING ?=
 
 # Use local lychee if available, otherwise use Docker
 LYCHEE_LOCAL := $(shell command -v lychee 2>/dev/null)
@@ -50,12 +51,18 @@ help: ## Show this help message
 # Tour (Docker-based)
 # =============================================================================
 
-start: deps-start docker-up dgraph-ready hugo-ready ## Start the tour
+start: deps-start dgraph-ready tour-ready ## Start the tour
 	@(command -v xdg-open &> /dev/null && xdg-open http://localhost:$(HUGO_PORT)/ 2>/dev/null) || \
 		(command -v open &> /dev/null && open http://localhost:$(HUGO_PORT)/ 2>/dev/null) || \
 		echo "To take the tour, open http://localhost:$(HUGO_PORT)/ in a browser"
 
 stop: docker-down ## Stop the tour
+
+restart: drop-all-data docker-up tour-ready ## Drop all data and restart the tour
+
+clean: drop-all-data docker-down ## Drop all data, stop containers, and remove tour images
+	@docker rm -f tour-hugo tour-seed 2>/dev/null || true
+	@docker rmi -f tour-tour tour-tour-seed 2>/dev/null || true
 
 drop-all-data: dgraph-ready ## Drop all data and schema from Dgraph
 	@echo "Dropping all data and schema from Dgraph..."
@@ -71,7 +78,7 @@ drop-all-data: dgraph-ready ## Drop all data and schema from Dgraph
 
 dev-setup: deps-dev ## Install dev dependencies
 
-dev-start: dev-setup docker-up dgraph-ready hugo-ready ## Start Hugo dev server with hot reload
+dev-start: dev-setup dgraph-ready tour-ready ## Start Hugo dev server with hot reload
 
 dev-stop: docker-down ## Stop Hugo server and Docker containers
 
@@ -99,7 +106,7 @@ test-movie-dataset: dgraph-ready
 	@echo "Testing movies dataset..."
 	@./tests/test_movies_dataset.sh
 
-test-tour-links: hugo-ready
+test-tour-links: tour-ready
 	@echo "Testing link validity in running tour at http://localhost:$(HUGO_PORT)/..."
 	@$(LYCHEE) --no-progress --config $(LYCHEE_TOUR_CONFIG) "http://localhost:$(HUGO_PORT)/"
 
@@ -109,8 +116,12 @@ test-tour-links: hugo-ready
 
 docker-up: ## Start Docker containers
 	@[[ -f /.dockerenv ]] && exit 0; \
-	if ! docker compose ps --status running 2>/dev/null | grep -q tour-; then \
-		docker compose up -d; \
+	docker compose up -d
+
+docker-up-dgraph: ## Start only Dgraph and Ratel containers
+	@[[ -f /.dockerenv ]] && exit 0; \
+	if ! docker compose ps --status running 2>/dev/null | grep -q tour-dgraph; then \
+		docker compose up -d dgraph ratel; \
 	fi
 
 docker-down: ## Stop Docker containers
@@ -175,18 +186,24 @@ seed-intro-dataset: dgraph-ready ## Load the tour sample dataset (DQL + GraphQL)
 	fi
 	@echo "Tour dataset loaded."
 
-seed-movie-dataset: dgraph-ready ## Load the movies dataset into Dgraph
+stage-movies-dataset: dgraph-ready ## Copy movie dataset files into the Dgraph container
+	# When running inside a Docker container (/.dockerenv exists), resources/ is
+	# already on the local filesystem — no staging needed. This check allows the
+	# same Makefile to work both on the host and inside the tour-seed container.
+	@[[ -f /.dockerenv ]] && exit 0; \
+	docker cp resources/1million.rdf.gz tour-dgraph:/tmp/1million.rdf.gz; \
+	docker cp resources/1million.schema tour-dgraph:/tmp/1million.schema
+
+seed-movie-dataset: stage-movies-dataset ## Load the movies dataset into Dgraph
 	@count=$$(curl -s -H "Content-Type: application/json" "$(DGRAPH_ALPHA)/query" -d '{"query": "{ count(func: has(genre), first: 1) { count(uid) } }"}' | grep -o '"count":[0-9]\+' | tail -1 | grep -o '[0-9]\+' || echo "0"); \
 	if [[ "$$count" == "0" || -z "$$count" ]]; then \
 		echo "Loading movies schema and data..."; \
 		if [[ -f /.dockerenv ]]; then \
+			: "Inside container: dgraph and resources/ are local, load via gRPC"; \
 			dgraph live -f resources/1million.rdf.gz -s resources/1million.schema --alpha tour-dgraph:9080; \
 		else \
-			[[ -s docker/dgraph/1million.rdf.gz ]] || cp resources/1million.rdf.gz docker/dgraph/; \
-			[[ -s docker/dgraph/1million.schema ]] || cp resources/1million.schema docker/dgraph/; \
-			docker exec tour-dgraph dgraph live -f 1million.rdf.gz -s 1million.schema; \
-			[[ -s docker/dgraph/1million.rdf.gz ]] && rm docker/dgraph/1million.rdf.gz || true; \
-			[[ -s docker/dgraph/1million.schema ]] && rm docker/dgraph/1million.schema || true; \
+			: "On host: files copied into container by stage-movies-dataset target"; \
+			docker exec tour-dgraph dgraph live -f /tmp/1million.rdf.gz -s /tmp/1million.schema; \
 		fi; \
 		echo "Done"; \
 	fi
@@ -196,6 +213,13 @@ seed-movie-dataset: dgraph-ready ## Load the movies dataset into Dgraph
 # =============================================================================
 
 deps-start:
+	@if ! command -v docker &> /dev/null && [[ -z "$(INSTALL_MISSING)" ]]; then \
+		echo "Error: docker is not installed."; \
+		echo ""; \
+		echo "Install it manually, or re-run with INSTALL_MISSING=1:"; \
+		echo "  make $(MAKECMDGOALS) INSTALL_MISSING=1"; \
+		exit 1; \
+	fi
 	@if [[ "$$(uname)" == "Darwin" ]]; then \
 		if ! command -v docker &> /dev/null; then \
 			(command -v brew &> /dev/null) || { echo "Installing Homebrew..." && /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; }; \
@@ -209,6 +233,20 @@ deps-start:
 	fi
 
 deps-dev: deps-start
+	@missing=""; \
+	command -v hugo &> /dev/null || missing="$$missing hugo"; \
+	command -v jq &> /dev/null || missing="$$missing jq"; \
+	command -v node &> /dev/null || missing="$$missing node"; \
+	command -v npm &> /dev/null || missing="$$missing npm"; \
+	command -v npx &> /dev/null || missing="$$missing npx"; \
+	command -v lychee &> /dev/null || echo "Note: lychee not found, falling back to Docker image"; \
+	if [[ -n "$$missing" && -z "$(INSTALL_MISSING)" ]]; then \
+		echo "Error: missing required dependencies:$$missing"; \
+		echo ""; \
+		echo "Install them manually, or re-run with INSTALL_MISSING=1:"; \
+		echo "  make $(MAKECMDGOALS) INSTALL_MISSING=1"; \
+		exit 1; \
+	fi
 	@if [[ "$$(uname)" == "Darwin" ]]; then \
 		(command -v brew &> /dev/null) || { echo "Installing Homebrew..." && /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; }; \
 		(command -v hugo &> /dev/null) || { echo "Installing hugo..." && brew install hugo; }; \
@@ -232,7 +270,7 @@ deps-dev: deps-start
 		(command -v npx &> /dev/null) || { echo "Installing npx..." && $$SUDO npm install -g npx; }; \
 	fi
 
-dgraph-ready: docker-up
+dgraph-ready: docker-up-dgraph
 	@timeout=60; while ! curl -s $(DGRAPH_ALPHA)/health | grep -q '"status":"healthy"'; do \
 		sleep 1; \
 		timeout=$$((timeout - 1)); \
@@ -244,7 +282,7 @@ dgraph-ready: docker-up
 		if [[ $$timeout -le 0 ]]; then echo "Timeout waiting for admin endpoint to report healthy status (POST $(DGRAPH_ALPHA)/admin)"; exit 1; fi; \
 	done
 
-hugo-ready: docker-up
+tour-ready: docker-up dgraph-ready
 	@timeout=60; while ! curl -s http://localhost:$(HUGO_PORT)/ > /dev/null 2>&1; do \
 		sleep 1; \
 		timeout=$$((timeout - 1)); \

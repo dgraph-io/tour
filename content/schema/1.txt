@@ -9,7 +9,7 @@ type Person {
 type Company {
     name
     industry
-    work_here #this is an alias
+    works_here #this is an alias
 }
 
 # Define Directives and index
@@ -18,4 +18,4 @@ industry: string @index(term) .
 boss_of: [uid] .
 name: string @index(exact, term) .
 works_for: [uid] .
-work_here: [uid] .
+works_here: [uid] .

@@ -1,7 +1,7 @@
 {
   q(func: eq(name, "CompanyABC")) {
     name
-    work_here : ~works_for {
+    works_here : ~works_for {
         uid
         name
     }

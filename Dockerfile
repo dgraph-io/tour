@@ -87,8 +87,5 @@ RUN DGRAPH_VERSION="25.1.0" && \
     wget -qO- "https://github.com/dgraph-io/dgraph/releases/download/v${DGRAPH_VERSION}/dgraph-linux-${DGRAPH_ARCH}.tar.gz" \
     | tar xz -C /usr/local/bin
 
-# Run make deps-dev
-RUN make deps-dev
-
 # Keep container running
 CMD ["tail", "-f", "/dev/null"]

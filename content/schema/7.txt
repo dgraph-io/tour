@@ -1,6 +1,21 @@
-{
-  set {
-    # <uid_of_michael> <boss_of> <uid_of_sarah> .
-    # <uid_of_sarah> <works_for> <uid_of_company> .
+upsert {
+  query {
+    companyabc(func: eq(name, "CompanyABC")) {
+      companyabc as uid
+    }
+    michael(func: eq(name, "Michael")) {
+      michael as uid
+    }
+    sarah(func: eq(name, "Sarah")) {
+      sarah as uid
+    }
+  }
+
+  mutation {
+    set {
+      uid(michael) <boss_of> uid(sarah) .
+      uid(michael) <works_for> uid(companyabc) .
+      uid(sarah) <works_for> uid(companyabc) .
+    }
   }
 }

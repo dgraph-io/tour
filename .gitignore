@@ -10,3 +10,4 @@ published/*/node_modules/
 docker/dgraph/*
 !docker/dgraph/.gitkeep
 .project
+.osgrep

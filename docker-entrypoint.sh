@@ -41,6 +41,15 @@ wait_for_dgraph() {
 # Seed the intro dataset
 seed_intro_dataset() {
     echo ""
+
+    # Check if data already exists by querying for a known record
+    response=$(curl -s -X POST "${DGRAPH_ALPHA}/query" -H "Content-Type: application/json" \
+        -d '{"query": "{ q(func: eq(name, \"Michael\")) { uid } }"}')
+    if echo "$response" | jq -e '.data.q | length > 0' > /dev/null 2>&1; then
+        echo "Tour data already exists, skipping seed."
+        return 0
+    fi
+
     echo "Loading tour DQL schema..."
     response=$(curl -s -X POST "${DGRAPH_ALPHA}/alter" -H "Content-Type: application/rdf" --data-binary @content/intro/2.txt)
     if ! echo "$response" | jq -e '.data.code == "Success"' > /dev/null 2>&1; then
@@ -101,7 +110,6 @@ EOF
 case "${1:-server}" in
     server)
         wait_for_dgraph
-        seed_intro_dataset
         start_hugo
         ;;
     seed)
